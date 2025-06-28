@@ -1,0 +1,12 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Festivaluri{% endblock %}
+
+{% block body %}
+    <h2>Lista Festivaluri:</h2>
+    <ul>
+        {% for festival in ids %}
+            <li>ID: {{ festival.id }} | Nume: {{ festival.name }}</li>
+        {% endfor %}
+    </ul>
+{% endblock %}
