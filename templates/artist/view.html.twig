@@ -1,0 +1,17 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Artist - {{ artist.name }}{% endblock %}
+
+{% block body %}
+    <div class="container mt-4">
+        <h2 class="mb-4" style="color: #003366;">{{ artist.name }}</h2>
+
+        <ul class="list-group">
+            <li class="list-group-item"><strong>ID:</strong> {{ artist.id }}</li>
+            <li class="list-group-item"><strong>Name:</strong> {{ artist.name }}</li>
+            <li class="list-group-item"><strong>Genre:</strong> {{ artist.musicalGenre }}</li>
+        </ul>
+
+        <a href="#" onclick="sessionStorage.removeItem('artistStartIndex'); window.location.href='{{ path('artists_list') }}'; return false;" class="btn btn-secondary mt-3">Back</a>
+    </div>
+{% endblock %}

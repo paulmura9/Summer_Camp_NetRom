@@ -1,0 +1,17 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Detalii - {{ details.name }}{% endblock %}
+
+{% block body %}
+    <div class="container mt-4">
+        <h2 class="mb-4" style="color: #003366;">{{ details.name }}</h2>
+
+        <ul class="list-group">
+            <li class="list-group-item"><strong>User ID:</strong> {{ details.user.id }}</li>
+            <li class="list-group-item"><strong>Name:</strong> {{ details.name }}</li>
+            <li class="list-group-item"><strong>Age:</strong> {{ details.age }}</li>
+        </ul>
+
+        <a href="#" onclick="window.location.href='{{ path('user_details_list') }}'; sessionStorage.removeItem('festivalStartIndex'); return false;" class="btn btn-secondary mt-3">Back</a>
+    </div>
+{% endblock %}

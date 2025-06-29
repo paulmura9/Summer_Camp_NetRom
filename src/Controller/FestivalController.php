@@ -22,7 +22,22 @@ final class FestivalController extends AbstractController
         ], $festivals);
 
         return $this->render('festival/index.html.twig', [
-            'ids' => $data
+            'festivals' => $data,
         ]);
     }
+
+    #[Route('/festival/{id}', name: 'festival_view', requirements: ['id' => '\d+'], methods: ['GET'])]
+    public function view(EntityManagerInterface $em, int $id): Response
+    {
+        $festival = $em->getRepository(Festival::class)->find($id);
+
+        if (!$festival) {
+            throw $this->createNotFoundException('Festival not found');
+        }
+
+        return $this->render('festival/view.html.twig', [
+            'festival' => $festival
+        ]);
+    }
+
 }

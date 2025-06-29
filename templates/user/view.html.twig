@@ -1,0 +1,18 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Utilizator - {{ user.email }}{% endblock %}
+
+{% block body %}
+    <div class="container mt-4">
+        <h2 class="mb-4" style="color: #003366;">{{ user.email }}</h2>
+
+        <ul class="list-group">
+            <li class="list-group-item"><strong>ID:</strong> {{ user.id }}</li>
+            <li class="list-group-item"><strong>Email:</strong> {{ user.email }}</li>
+            <li class="list-group-item"><strong>Role:</strong> {{ user.role }}</li>
+            <li class="list-group-item"><strong>Token:</strong> {{ user.token }}</li>
+        </ul>
+
+        <a href="#" onclick="sessionStorage.removeItem('festivalStartIndex'); window.location.href='{{ path('users_list') }}'; return false;" class="btn btn-secondary mt-3">Back</a>
+    </div>
+{% endblock %}

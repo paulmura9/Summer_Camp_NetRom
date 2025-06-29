@@ -82,7 +82,6 @@ class Artist
     public function removeFestivalArtist(FestivalArtist $festivalArtist): static
     {
         if ($this->festivalArtists->removeElement($festivalArtist)) {
-            // set the owning side to null (unless already changed)
             if ($festivalArtist->getArtist() === $this) {
                 $festivalArtist->setArtist(null);
             }

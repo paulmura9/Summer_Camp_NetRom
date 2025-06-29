@@ -33,6 +33,9 @@ class User
     #[ORM\OneToMany(targetEntity: Purchase::class, mappedBy: 'user')]
     private Collection $purchases;
 
+    #[ORM\OneToOne(targetEntity: UserDetails::class, mappedBy: 'user', cascade: ['persist', 'remove'])]
+    private ?UserDetails $details = null;
+
     public function __construct()
     {
         $this->purchases = new ArrayCollection();
@@ -112,7 +115,6 @@ class User
     public function removePurchase(Purchase $purchase): static
     {
         if ($this->purchases->removeElement($purchase)) {
-            // set the owning side to null (unless already changed)
             if ($purchase->getUser() === $this) {
                 $purchase->setUser(null);
             }
@@ -120,4 +122,21 @@ class User
 
         return $this;
     }
+    public function getDetails(): ?UserDetails
+    {
+        return $this->details;
+    }
+
+    public function setDetails(?UserDetails $details): static
+    {
+        $this->details = $details;
+
+        if ($details && $details->getUser() !== $this) {
+            $details->setUser($this);
+        }
+
+        return $this;
+    }
+
+
 }

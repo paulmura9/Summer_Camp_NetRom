@@ -1,12 +1,12 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Festivaluri{% endblock %}
+{% block title %}User Details{% endblock %}
 
 {% block body %}
     <div class="container mt-4 text-center">
-        <h2 class="mb-4">Festivals</h2>
+        <h2 class="mb-4">Users Details</h2>
 
-        <div id="festival-container" class="d-flex justify-content-center gap-3 flex-wrap mb-4"></div>
+        <div id="details-container" class="d-flex justify-content-center gap-3 flex-wrap mb-4"></div>
 
         <nav>
             <ul class="pagination justify-content-center">
@@ -21,44 +21,36 @@
     </div>
 
     <script>
-        const festivals = {{ festivals|json_encode|raw }};
-        const container = document.getElementById('festival-container');
+        const details = {{ details|json_encode|raw }};
+        const container = document.getElementById('details-container');
         let currentIndex = 0;
         const pageSize = 10;
 
-        if (sessionStorage.getItem('festivalStartIndex')) {
-            currentIndex = parseInt(sessionStorage.getItem('festivalStartIndex'), 10);
-        }
-
         function renderPage() {
-            if (!container) return;
-
             container.innerHTML = '';
-            const pageFestivals = festivals.slice(currentIndex, currentIndex + pageSize);
-            pageFestivals.forEach(f => {
+            const page = details.slice(currentIndex, currentIndex + pageSize);
+            page.forEach(d => {
                 const card = document.createElement('div');
                 card.className = 'p-2 text-center';
-                card.style.backgroundColor = '#bde0fe';
+                card.style.backgroundColor = '#e0f3ff';
                 card.style.borderRadius = '10px';
-                card.style.minWidth = '60px';
+                card.style.minWidth = '100px';
                 card.style.display = 'inline-block';
                 card.style.margin = '0 5px';
 
                 card.innerHTML = `
-                <div style="font-size: 0.9rem;">${f.id}</div>
+                <div style="font-size: 0.9rem;">User ID: ${d.user_id}</div>
                 <div style="font-size: 1rem; font-weight: bold;">
-                    <a href="/festival/${f.id}" style="color: #004085; text-decoration: none;">
-                        ${f.name}
                     </a>
+                    <a href="/user/details/${d.user_id}" style="color: #004085; text-decoration: none;">
+                        ${d.name}
                 </div>
             `;
                 container.appendChild(card);
             });
 
             document.getElementById('prevBtn').disabled = currentIndex <= 0;
-            document.getElementById('nextBtn').disabled = currentIndex + pageSize >= festivals.length;
-
-            sessionStorage.setItem('festivalStartIndex', currentIndex);
+            document.getElementById('nextBtn').disabled = currentIndex + pageSize >= details.length;
         }
 
         function previousPage() {
@@ -69,15 +61,14 @@
         }
 
         function nextPage() {
-            if (currentIndex + pageSize < festivals.length) {
+            if (currentIndex + pageSize < details.length) {
                 currentIndex++;
                 renderPage();
             }
         }
 
-        window.addEventListener('pageshow', function (event) {
+        window.addEventListener('pageshow', function () {
             renderPage();
         });
     </script>
-
 {% endblock %}

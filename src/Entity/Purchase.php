@@ -4,6 +4,8 @@ namespace App\Entity;
 
 use App\Repository\PurchaseRepository;
 use Doctrine\ORM\Mapping as ORM;
+use App\Entity\User;
+use App\Entity\Festival;
 
 #[ORM\Entity(repositoryClass: PurchaseRepository::class)]
 class Purchase
@@ -14,16 +16,10 @@ class Purchase
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'purchases')]
-    private ?user $user = null;
+    private ?User $user = null;
 
     #[ORM\ManyToOne(inversedBy: 'purchases')]
-    private ?festival $festival = null;
-
-    #[ORM\Column]
-    private ?int $price = null;
-
-    #[ORM\Column(length: 255)]
-    private ?string $type = null;
+    private ?Festival $festival = null;
 
     public function getId(): ?int
     {
@@ -50,30 +46,6 @@ class Purchase
     public function setFestival(?festival $festival): static
     {
         $this->festival = $festival;
-
-        return $this;
-    }
-
-    public function getPrice(): ?int
-    {
-        return $this->price;
-    }
-
-    public function setPrice(int $price): static
-    {
-        $this->price = $price;
-
-        return $this;
-    }
-
-    public function getType(): ?string
-    {
-        return $this->type;
-    }
-
-    public function setType(string $type): static
-    {
-        $this->type = $type;
 
         return $this;
     }
