@@ -14,10 +14,11 @@ class FestivalArtist
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'festivalArtists')]
+    #[ORM\JoinColumn(onDelete: 'CASCADE')]
     private ?Festival $festival = null;
 
     #[ORM\ManyToOne(inversedBy: 'festivalArtists')]
-    private ?Artist $Artist = null;
+    private ?Artist $artist = null;
 
     public function getId(): ?int
     {
@@ -38,12 +39,12 @@ class FestivalArtist
 
     public function getArtist(): ?Artist
     {
-        return $this->Artist;
+        return $this->artist;
     }
 
     public function setArtist(?Artist $Artist): static
     {
-        $this->Artist = $Artist;
+        $this->artist = $Artist;
 
         return $this;
     }

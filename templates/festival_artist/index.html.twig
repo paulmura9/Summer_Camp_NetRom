@@ -1,82 +1,33 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Festival - Artist{% endblock %}
+{% block title %}Festival - Artist Connections{% endblock %}
 
 {% block body %}
     <div class="container mt-4 text-center">
         <h2 class="mb-4">Festival - Artist</h2>
 
-        <div id="connection-container" class="d-flex justify-content-center gap-3 flex-wrap mb-4"></div>
-
-        <nav>
-            <ul class="pagination justify-content-center">
-                <li class="page-item">
-                    <button class="page-link" onclick="previousPage()" id="prevBtn">Previous</button>
-                </li>
-                <li class="page-item">
-                    <button class="page-link" onclick="nextPage()" id="nextBtn">Next</button>
-                </li>
-            </ul>
-        </nav>
+        <div class="d-flex justify-content-center gap-3 flex-wrap mb-4">
+            {% for conn in connections %}
+                <div class="card text-start shadow-sm" style="background-color: #cce5ff; min-width: 250px; max-width: 300px; border-radius: 10px;">
+                    <div class="card-body">
+                        <p class="card-text mb-0">
+                            <strong>Festival:</strong>
+                            <a href="{{ path('festival_view', {id: conn.festival.id}) }}" class="text-decoration-none text-primary">
+                                {{ conn.festival.name }}
+                            </a>
+                        </p>
+                        <p class="card-text mb-0">
+                            <strong>Artist:</strong>
+                            <a href="{{ path('artist_view', {id: conn.artist.id}) }}" class="text-decoration-none text-primary">
+                                {{ conn.artist.name }}
+                            </a>
+                        </p>
+                        <small class="text-muted">Festival ID: {{ conn.festival.id }}, Artist ID: {{ conn.artist.id }}</small>
+                    </div>
+                </div>
+            {% else %}
+                <p>Nu există conexiuni între festivaluri și artiști.</p>
+            {% endfor %}
+        </div>
     </div>
-
-    <script>
-        const connections = {{ connections|json_encode|raw }};
-        const container = document.getElementById('connection-container');
-        let currentIndex = 0;
-        const pageSize = 10;
-
-        if (sessionStorage.getItem('connectionStartIndex')) {
-            currentIndex = parseInt(sessionStorage.getItem('connectionStartIndex'), 10);
-        }
-
-        function renderPage() {
-            if (!container) return;
-
-            container.innerHTML = '';
-            const pageConnections = connections.slice(currentIndex, currentIndex + pageSize);
-            pageConnections.forEach(c => {
-                const card = document.createElement('div');
-                card.className = 'p-2 text-center';
-                card.style.backgroundColor = '#bde0fe';
-                card.style.borderRadius = '10px';
-                card.style.minWidth = '140px';
-                card.style.display = 'inline-block';
-                card.style.margin = '0 5px';
-
-                card.innerHTML = `
-                    <div style="font-size: 0.9rem;">
-                        <strong>Festival:</strong> ${c.festival.id} - ${c.festival.name}
-                    </div>
-                    <div style="font-size: 0.9rem;">
-                        <strong>Artist:</strong> ${c.artist.id} - ${c.artist.name}
-                    </div>
-                `;
-                container.appendChild(card);
-            });
-
-            document.getElementById('prevBtn').disabled = currentIndex <= 0;
-            document.getElementById('nextBtn').disabled = currentIndex + pageSize >= connections.length;
-
-            sessionStorage.setItem('connectionStartIndex', currentIndex);
-        }
-
-        function previousPage() {
-            if (currentIndex > 0) {
-                currentIndex--;
-                renderPage();
-            }
-        }
-
-        function nextPage() {
-            if (currentIndex + pageSize < connections.length) {
-                currentIndex++;
-                renderPage();
-            }
-        }
-
-        window.addEventListener('pageshow', function () {
-            renderPage();
-        });
-    </script>
 {% endblock %}

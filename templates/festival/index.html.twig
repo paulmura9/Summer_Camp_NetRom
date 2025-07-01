@@ -1,83 +1,28 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Festivaluri{% endblock %}
+{% block title %}Festivals{% endblock %}
 
 {% block body %}
     <div class="container mt-4 text-center">
         <h2 class="mb-4">Festivals</h2>
 
-        <div id="festival-container" class="d-flex justify-content-center gap-3 flex-wrap mb-4"></div>
-
-        <nav>
-            <ul class="pagination justify-content-center">
-                <li class="page-item">
-                    <button class="page-link" onclick="previousPage()" id="prevBtn">Previous</button>
-                </li>
-                <li class="page-item">
-                    <button class="page-link" onclick="nextPage()" id="nextBtn">Next</button>
-                </li>
-            </ul>
-        </nav>
-    </div>
-
-    <script>
-        const festivals = {{ festivals|json_encode|raw }};
-        const container = document.getElementById('festival-container');
-        let currentIndex = 0;
-        const pageSize = 10;
-
-        if (sessionStorage.getItem('festivalStartIndex')) {
-            currentIndex = parseInt(sessionStorage.getItem('festivalStartIndex'), 10);
-        }
-
-        function renderPage() {
-            if (!container) return;
-
-            container.innerHTML = '';
-            const pageFestivals = festivals.slice(currentIndex, currentIndex + pageSize);
-            pageFestivals.forEach(f => {
-                const card = document.createElement('div');
-                card.className = 'p-2 text-center';
-                card.style.backgroundColor = '#bde0fe';
-                card.style.borderRadius = '10px';
-                card.style.minWidth = '60px';
-                card.style.display = 'inline-block';
-                card.style.margin = '0 5px';
-
-                card.innerHTML = `
-                <div style="font-size: 0.9rem;">${f.id}</div>
-                <div style="font-size: 1rem; font-weight: bold;">
-                    <a href="/festival/${f.id}" style="color: #004085; text-decoration: none;">
-                        ${f.name}
-                    </a>
+        <div class="d-flex justify-content-center gap-3 flex-wrap mb-4">
+            {% for festival in festivals %}
+                <div class="p-2 text-center" style="background-color: #bde0fe; border-radius: 10px; min-width: 60px; display: inline-block; margin: 0 5px;">
+                    <div style="font-size: 0.9rem;">{{ festival.id }}</div>
+                    <div style="font-size: 1rem; font-weight: bold;">
+                        <a href="{{ path('festival_view', {id: festival.id}) }}" style="color: #004085; text-decoration: none;">
+                            {{ festival.name }}
+                        </a>
+                    </div>
                 </div>
-            `;
-                container.appendChild(card);
-            });
+            {% else %}
+                <p>Nu există festivaluri.</p>
+            {% endfor %}
+        </div>
 
-            document.getElementById('prevBtn').disabled = currentIndex <= 0;
-            document.getElementById('nextBtn').disabled = currentIndex + pageSize >= festivals.length;
-
-            sessionStorage.setItem('festivalStartIndex', currentIndex);
-        }
-
-        function previousPage() {
-            if (currentIndex > 0) {
-                currentIndex--;
-                renderPage();
-            }
-        }
-
-        function nextPage() {
-            if (currentIndex + pageSize < festivals.length) {
-                currentIndex++;
-                renderPage();
-            }
-        }
-
-        window.addEventListener('pageshow', function (event) {
-            renderPage();
-        });
-    </script>
-
+        <div class="pagination justify-content-center">
+            {{ knp_pagination_render(festivals) }}
+        </div>
+    </div>
 {% endblock %}

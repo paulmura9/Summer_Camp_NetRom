@@ -6,69 +6,30 @@
     <div class="container mt-4 text-center">
         <h2 class="mb-4">Purchases</h2>
 
-        <div id="purchase-container" class="d-flex justify-content-center gap-3 flex-wrap mb-4"></div>
+        <div class="d-flex justify-content-center gap-3 flex-wrap mb-4">
+            {% for purchase in purchases %}
+                <div class="p-3 text-start shadow-sm" style="background-color: #bde0fe; border-radius: 10px; min-width: 220px;">
+                    <div><strong>ID:</strong> {{ purchase.id }}</div>
+                    <div>
+                        <strong>User:</strong>
+                        <a href="{{ path('user_view', { id: purchase.user.id }) }}" style="text-decoration: none; color: #004085;">
+                            {{ purchase.user.id }} - {{ purchase.user.email }}
+                        </a>
+                    </div>
+                    <div>
+                        <strong>Festival:</strong>
+                        <a href="{{ path('festival_view', { id: purchase.festival.id }) }}" style="text-decoration: none; color: #004085;">
+                            {{ purchase.festival.id }} - {{ purchase.festival.name }}
+                        </a>
+                    </div>
+                </div>
+            {% else %}
+                <p>Nu există cumpărături.</p>
+            {% endfor %}
+        </div>
 
-        <nav>
-            <ul class="pagination justify-content-center">
-                <li class="page-item">
-                    <button class="page-link" onclick="previousPage()" id="prevBtn">Previous</button>
-                </li>
-                <li class="page-item">
-                    <button class="page-link" onclick="nextPage()" id="nextBtn">Next</button>
-                </li>
-            </ul>
-        </nav>
+        <div class="pagination justify-content-center">
+            {{ knp_pagination_render(purchases) }}
+        </div>
     </div>
-
-    <script>
-        const purchases = {{ purchases|json_encode|raw }};
-        const container = document.getElementById('purchase-container');
-        let currentIndex = 0;
-        const pageSize = 10;
-
-        function renderPage() {
-            container.innerHTML = '';
-            const pageData = purchases.slice(currentIndex, currentIndex + pageSize);
-
-            pageData.forEach(p => {
-                const card = document.createElement('div');
-                card.className = 'p-2 text-center';
-                card.style.backgroundColor = '#bde0fe';
-                card.style.borderRadius = '10px';
-                card.style.minWidth = '200px';
-                card.style.display = 'inline-block';
-                card.style.margin = '0 5px';
-
-                card.innerHTML = `
-                    <div style="font-size: 0.95rem;">
-                        <strong>User:</strong> ${p.user.id} - ${p.user.email}
-                    </div>
-                    <div style="font-size: 0.9rem;">
-                        <strong>Festival:</strong> ${p.festival.id} - ${p.festival.name}
-                    </div>
-                `;
-
-                container.appendChild(card);
-            });
-
-            document.getElementById('prevBtn').disabled = currentIndex <= 0;
-            document.getElementById('nextBtn').disabled = currentIndex + pageSize >= purchases.length;
-        }
-
-        function previousPage() {
-            if (currentIndex > 0) {
-                currentIndex--;
-                renderPage();
-            }
-        }
-
-        function nextPage() {
-            if (currentIndex + pageSize < purchases.length) {
-                currentIndex++;
-                renderPage();
-            }
-        }
-
-        window.addEventListener('pageshow', renderPage);
-    </script>
 {% endblock %}
