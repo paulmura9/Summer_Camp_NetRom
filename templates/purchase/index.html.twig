@@ -1,30 +1,84 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Purchases{% endblock %}
+{% block title %}My Tickets{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        html, body {
+            background-color: #99dab0;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        .tickets-container {
+            max-width: 1000px;
+            margin: 4rem auto;
+            text-align: center;
+        }
+
+        .tickets-title {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #28a745;
+            margin-bottom: 2rem;
+        }
+
+        .ticket-card {
+            background-color: #cec4ec;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            text-align: left;
+            min-width: 250px;
+            box-shadow: 0 0 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .ticket-info a {
+            text-decoration: none;
+            color: #4a0072;
+            font-weight: bold;
+        }
+
+        .ticket-info strong {
+            color: #4a0072;
+        }
+
+        .ticket-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem;
+            justify-content: center;
+        }
+
+        .pagination {
+            margin-top: 2rem;
+        }
+    </style>
+{% endblock %}
 
 {% block body %}
-    <div class="container mt-4 text-center">
-        <h2 class="mb-4">Purchases</h2>
+    <div class="tickets-container">
+        <div class="tickets-title">My Tickets</div>
 
-        <div class="d-flex justify-content-center gap-3 flex-wrap mb-4">
+        <div class="ticket-grid">
             {% for purchase in purchases %}
-                <div class="p-3 text-start shadow-sm" style="background-color: #bde0fe; border-radius: 10px; min-width: 220px;">
-                    <div><strong>ID:</strong> {{ purchase.id }}</div>
-                    <div>
-                        <strong>User:</strong>
-                        <a href="{{ path('user_view', { id: purchase.user.id }) }}" style="text-decoration: none; color: #004085;">
-                            {{ purchase.user.id }} - {{ purchase.user.email }}
-                        </a>
-                    </div>
-                    <div>
-                        <strong>Festival:</strong>
-                        <a href="{{ path('festival_view', { id: purchase.festival.id }) }}" style="text-decoration: none; color: #004085;">
-                            {{ purchase.festival.id }} - {{ purchase.festival.name }}
-                        </a>
+                <div class="ticket-card">
+                    <div class="ticket-info">
+                        <div>
+                            <strong>Festival:</strong><br>
+                            <a href="{{ path('festival_view', { id: purchase.festival.id }) }}">
+                                {{ purchase.festival.name }}
+                            </a>
+                        </div>
+                        <div>
+                            <strong>Price:</strong> €{{ purchase.festival.price|number_format(2, '.', ',') }}
+                        </div>
+                        <div>
+                            <strong>Starts at:</strong> {{ purchase.festival.startDate|date('d M Y') }}
+                        </div>
                     </div>
                 </div>
             {% else %}
-                <p>Nu există cumpărături.</p>
+                <p>You have no purchases.</p>
             {% endfor %}
         </div>
 

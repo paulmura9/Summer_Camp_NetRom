@@ -3,6 +3,8 @@
 namespace App\Controller;
 
 use App\Entity\User;
+use App\Entity\UserDetails;
+use App\Form\UserDetailsForm;
 use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -34,8 +36,8 @@ final class UserController extends AbstractController
         ]);
     }
 
-    #[Route('/user/{id}', name: 'user_view', requirements: ['id' => '\d+'], methods: ['GET'])]
-    public function view(EntityManagerInterface $em, int $id): Response
+    #[Route('/user/{id}', name: 'user_view', methods: ['GET', 'POST'])]
+    public function view(Request $request, EntityManagerInterface $em, int $id): Response
     {
         $user = $em->getRepository(User::class)->find($id);
 
@@ -43,8 +45,20 @@ final class UserController extends AbstractController
             throw $this->createNotFoundException('User not found');
         }
 
+        $details = $user->getDetails();
+        $form = $this->createForm(UserDetailsForm::class, $details);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $em->flush();
+            $this->addFlash('success', 'Datele au fost actualizate.');
+            return $this->redirectToRoute('user_view', ['id' => $id]);
+        }
+
         return $this->render('user/view.html.twig', [
-            'user' => $user
+            'user' => $user,
+            'details' => $details,
+            'form' => $form->createView(),
         ]);
     }
 
@@ -63,5 +77,20 @@ final class UserController extends AbstractController
 
         $this->addFlash('success', 'Userul a fost șters cu succes.');
         return $this->redirectToRoute('users_list');
+    }
+
+    #[Route('/user/edit/{id}', name: 'user_edit', methods: ['POST'])]
+    public function edit(Request $request, EntityManagerInterface $em, int $id): Response
+    {
+        $user = $em->getRepository(User::class)->find($id);
+        $details = $user->getDetails();
+
+        $details->setName($request->request->get('name'));
+        $details->setAge((int) $request->request->get('age'));
+
+        $em->flush();
+
+        $this->addFlash('success', 'Profilul a fost actualizat.');
+        return $this->redirectToRoute('user_view', ['id' => $user->getId()]);
     }
 }

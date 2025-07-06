@@ -1,0 +1,191 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}ShowTime{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #99dab0;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        .navbar-custom {
+            background-color: #99dab0;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            width: 100%;
+        }
+
+        .navbar-right {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .btn-purple {
+            background-color: #6f42c1;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 0.5rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-purple:hover {
+            background-color: #5936a3;
+        }
+
+        .dropdown .btn-outline-dark {
+            background-color: white;
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 8px 12px;
+            color: #000;
+        }
+
+        .content-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            text-align: center;
+            padding-top: 15vh;
+            height: calc(100vh - 80px);
+        }
+
+        .logo-title {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #28a745;
+            margin-bottom: 0.5rem;
+        }
+
+        .lead {
+            font-size: 1.2rem;
+            color: #333;
+            margin-bottom: 2rem;
+        }
+
+        .card-container {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .card {
+            border: none;
+            border-radius: 0.75rem;
+            background-color: #cec4ec;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            width: 250px;
+            text-align: center;
+            padding: 1.5rem;
+        }
+
+        .card-title {
+            color: #4a0072;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .btn-success {
+            background-color: #218838;
+            border-color: #1e7e34;
+            border-radius: 0.4rem;
+        }
+
+        .btn-success:hover {
+            background-color: #1e7e34;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <div class="navbar-custom">
+        <div class="navbar-right">
+            {% if 'ROLE_ADMIN' not in app.user.roles %}
+                <a href="/" class="btn btn-purple">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                         class="bi bi-ticket-perforated" viewBox="0 0 16 16">
+                        <path d="M4 4.85v.9h1v-.9zm7 0v.9h1v-.9zm-7 1.8v.9h1v-.9zm7 0v.9h1v-.9zm-7 1.8v.9h1v-.9zm7 0v.9h1v-.9zm-7 1.8v.9h1v-.9zm7 0v.9h1v-.9z"/>
+                        <path d="M1.5 3A1.5 1.5 0 0 0 0 4.5V6a.5.5 0 0 0 .5.5 1.5 1.5 0 1 1 0 3 .5.5 0 0 0-.5.5v1.5A1.5 1.5 0 0 0 1.5 13h13a1.5 1.5 0 0 0 1.5-1.5V10a.5.5 0 0 0-.5-.5 1.5 1.5 0 0 1 0-3A.5.5 0 0 0 16 6V4.5A1.5 1.5 0 0 0 14.5 3zM1 4.5a.5.5 0 0 1 .5-.5h13a.5.5 0 0 1 .5.5v1.05a2.5 2.5 0 0 0 0 4.9v1.05a.5.5 0 0 1-.5.5h-13a.5.5 0 0 1-.5-.5v-1.05a2.5 2.5 0 0 0 0-4.9z"/>
+                    </svg>
+                    Buy Tickets
+                </a>
+                <a href="{{ path('purchase_list') }}" class="btn btn-purple">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-wallet2" viewBox="0 0 16 16">
+                        <path d="M12.136.326A1.5 1.5 0 0 1 14 1.78V3h.5A1.5 1.5 0 0 1 16 4.5v9a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 0 13.5v-9a1.5 1.5 0 0 1 1.432-1.499zM5.562 3H13V1.78a.5.5 0 0 0-.621-.484zM1.5 4a.5.5 0 0 0-.5.5v9a.5.5 0 0 0 .5.5h13a.5.5 0 0 0 .5-.5v-9a.5.5 0 0 0-.5-.5z"/>
+                    </svg>
+                    My Tickets
+                </a>
+            {% endif %}
+            <div class="dropdown">
+                <button class="btn btn-outline-dark dropdown-toggle d-flex align-items-center gap-2" type="button" id="userMenu" data-bs-toggle="dropdown" aria-expanded="false">
+                    <span>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor"
+                             class="bi bi-person-circle svg-icon" viewBox="0 0 16 16">
+                            <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0"/>
+                            <path fill-rule="evenodd"
+                                  d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m8-7a7 7 0 0 0-5.468
+                                  11.37C3.242 11.226 4.805 10 8 10s4.757 1.225
+                                  5.468 2.37A7 7 0 0 0 8 1"/>
+                        </svg>
+                    </span>
+                    <span>{{ app.user.email }}</span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
+                    <li><a class="dropdown-item" href="{{ path('user_view', { id: app.user.id }) }}">Account Details</a></li>
+                    <li><a class="dropdown-item" href="{{ path('app_logout') }}">Logout</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="content-wrapper">
+        <div class="logo-title">SHOW TIME</div>
+        <p class="lead">The place to be for all your favorite festivals & artists!</p>
+
+        <div class="card-container">
+            <div class="card">
+                <h5 class="card-title">Festivals</h5>
+                <p class="card-text">Discover all the upcoming festivals you can attend!</p>
+                <a href="{{ path('festivals_list') }}" class="btn btn-success">Explore</a>
+            </div>
+
+            <div class="card">
+                <h5 class="card-title">Artists</h5>
+                <p class="card-text">Browse the lineup of incredible performers!</p>
+                <a href="{{ path('artists_list') }}" class="btn btn-success">Browse</a>
+            </div>
+
+            {% if 'ROLE_ADMIN' in app.user.roles %}
+                <div class="card">
+                    <h5 class="card-title">Users</h5>
+                    <p class="card-text">Manage the full list of registered users.</p>
+                    <a href="{{ path('users_list') }}" class="btn btn-success">View Users</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    <script>
+        if (!sessionStorage.getItem('hasRefreshed')) {
+            sessionStorage.setItem('hasRefreshed', 'true');
+            location.reload();
+        }
+    </script>
+{% endblock %}

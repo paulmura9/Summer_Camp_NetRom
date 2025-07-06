@@ -2,37 +2,116 @@
 
 {% block title %}Festivals{% endblock %}
 
-{% block body %}
-    <div class="container mt-4 text-center">
-        <h2 class="mb-4">Festivals</h2>
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #99dab0;
+            font-family: 'Segoe UI', sans-serif;
+        }
 
-        <div class="d-flex justify-content-center gap-3 flex-wrap mb-4">
+        .festival-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 2rem;
+            padding: 2rem;
+            justify-items: center;
+        }
+
+        .festival-card {
+            background-color: #cec4ec;
+            padding: 1.5rem;
+            border-radius: 1rem;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 300px;
+            text-align: center;
+        }
+
+        .festival-card h5 {
+            color: #4a0072;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+
+        .festival-card p {
+            margin-bottom: 0.75rem;
+        }
+
+        .btn-success {
+            background-color: #218838;
+            border-color: #1e7e34;
+            border-radius: 0.4rem;
+        }
+
+        .btn-success:hover {
+            background-color: #1e7e34;
+        }
+
+        .pagination {
+            margin-top: 2rem;
+        }
+
+        .pagination li a,
+        .pagination li span {
+            background-color: #e5d8f8;
+            color: #4a0072;
+            border: 1px solid #bfa0e0;
+            padding: 0.5rem 0.75rem;
+            margin: 0 2px;
+            border-radius: 0.4rem;
+            text-decoration: none;
+        }
+
+        .pagination li.active span,
+        .pagination li a:hover {
+            background-color: #6f42c1;
+            color: white;
+            border-color: #5936a3;
+        }
+
+        .pagination li.disabled span {
+            background-color: #ddd;
+            color: #999;
+            border-color: #ccc;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <div class="container text-center">
+        <h1 class="mt-4 mb-4">Festivals</h1>
+
+        <div class="festival-grid">
             {% for festival in festivals %}
-                <div class="p-2 text-center" style="background-color: #bde0fe; border-radius: 10px; min-width: 60px; display: inline-block; margin: 0 5px;">
-                    <div style="font-size: 0.9rem;">{{ festival.id }}</div>
-                    <div style="font-size: 1rem; font-weight: bold;">
-                        <a href="{{ path('festival_view', {id: festival.id}) }}" style="color: #004085; text-decoration: none;">
-                            {{ festival.name }}
-                        </a>
-                    </div>
+                <div class="festival-card">
+                    <h5>{{ festival.name }}</h5>
+                    <p>{{ festival.startDate ? festival.startDate|date('Y-m-d') : 'Unknown Date' }}</p>
+                    <a href="{{ path('festival_view', {id: festival.id}) }}" class="btn btn-success">View</a>
                 </div>
             {% else %}
                 <p>Nu există festivaluri.</p>
             {% endfor %}
         </div>
 
-        <div class="pagination justify-content-center">
+        <div class="pagination justify-content-center mt-4">
             {{ knp_pagination_render(festivals) }}
         </div>
 
-        <div class="text-center">
-            <a href="{{ path('festival_create') }}" class="btn btn-success">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16">
-                    <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4"/>
-                </svg>
-                Create
-            </a>
-        </div>
-
+        {% if is_granted('ROLE_ADMIN') %}
+            <div class="text-center mt-3">
+                <a href="{{ path('festival_create') }}" class="btn btn-create">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                         class="bi bi-plus" viewBox="0 0 16 16">
+                        <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4"/>
+                    </svg>
+                    Create Festival
+                </a>
+            </div>
+        {% endif %}
     </div>
 {% endblock %}
