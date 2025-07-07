@@ -5,6 +5,8 @@ namespace App\Controller;
 use App\Entity\User;
 use App\Entity\UserDetails;
 use App\Form\UserDetailsForm;
+use App\Form\UserEditForm;
+use App\Form\UserForm;
 use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -28,7 +30,7 @@ final class UserController extends AbstractController
         $users = $paginator->paginate(
             $query,
             $request->query->getInt('page', 1),
-            10
+            12
         );
 
         return $this->render('user/index.html.twig', [
@@ -51,7 +53,7 @@ final class UserController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $em->flush();
-            $this->addFlash('success', 'Datele au fost actualizate.');
+            $this->addFlash('success', 'Update successful');
             return $this->redirectToRoute('user_view', ['id' => $id]);
         }
 
@@ -68,29 +70,70 @@ final class UserController extends AbstractController
         $user = $em->getRepository(User::class)->find($id);
 
         if (!$user) {
-            $this->addFlash('error', 'Userul nu a fost găsit.');
+            $this->addFlash('error', 'User not found.');
             return $this->redirectToRoute('users_list');
         }
 
         $em->remove($user);
         $em->flush();
 
-        $this->addFlash('success', 'Userul a fost șters cu succes.');
+        $this->addFlash('success', 'User has been deleted.');
         return $this->redirectToRoute('users_list');
     }
 
-    #[Route('/user/edit/{id}', name: 'user_edit', methods: ['POST'])]
+    #[Route('/user/edit/{id}', name: 'user_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, EntityManagerInterface $em, int $id): Response
     {
         $user = $em->getRepository(User::class)->find($id);
+        if (!$user) {
+            $this->addFlash('error', 'User not found.');
+            return $this->redirectToRoute('users_list');
+        }
+
         $details = $user->getDetails();
 
-        $details->setName($request->request->get('name'));
-        $details->setAge((int) $request->request->get('age'));
+        $form = $this->createForm(UserEditForm::class, $user, [
+            'data' => $user,
+        ]);
 
-        $em->flush();
+        $form->get('name')->setData($details->getName());
+        $form->get('age')->setData($details->getAge());
 
-        $this->addFlash('success', 'Profilul a fost actualizat.');
-        return $this->redirectToRoute('user_view', ['id' => $user->getId()]);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $details->setName($form->get('name')->getData());
+            $details->setAge($form->get('age')->getData());
+            $em->flush();
+
+            $this->addFlash('success', 'User updated successfully.');
+            return $this->redirectToRoute('user_view', ['id' => $user->getId()]);
+        }
+
+        return $this->render('user/edit.html.twig', [
+            'form' => $form->createView(),
+            'user' => $user,
+        ]);
+    }
+    #[Route('/user/update-details/{id}', name: 'user_update_details', methods: ['POST'])]
+    public function updateDetails(Request $request, EntityManagerInterface $em, int $id): Response
+    {
+        $user = $em->getRepository(User::class)->find($id);
+        if (!$user) {
+            throw $this->createNotFoundException('User not found');
+        }
+
+        $details = $user->getDetails();
+        $form = $this->createForm(UserDetailsForm::class, $details);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $em->flush();
+            $this->addFlash('success', 'Updated profile');
+        } else {
+            $this->addFlash('error', 'Error updating profile');
+        }
+
+        return $this->redirectToRoute('user_view', ['id' => $id]);
     }
 }

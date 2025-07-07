@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}My Tickets{% endblock %}
+{% block title %}All Purchases{% endblock %}
 
 {% block stylesheets %}
     {{ parent() }}
@@ -19,7 +19,7 @@
         .tickets-title {
             font-size: 2rem;
             font-weight: bold;
-            color: #28a745;
+            color: #6f42c1;
             margin-bottom: 2rem;
         }
 
@@ -52,12 +52,18 @@
         .pagination {
             margin-top: 2rem;
         }
+
         .festival-link {
             color: #000 !important;
             text-decoration: none;
         }
+
         .festival-link:hover {
             text-decoration: underline;
+        }
+        h1 {
+            color: #218838;
+            font-weight: bold;
         }
         .btn-back {
             background-color: #6f42c1;
@@ -81,14 +87,17 @@
 
 {% block body %}
     <div class="tickets-container">
-        <div class="tickets-title">My Tickets <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-ticket-perforated-fill" viewBox="0 0 16 16">
-                <path d="M0 4.5A1.5 1.5 0 0 1 1.5 3h13A1.5 1.5 0 0 1 16 4.5V6a.5.5 0 0 1-.5.5 1.5 1.5 0 0 0 0 3 .5.5 0 0 1 .5.5v1.5a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 0 11.5V10a.5.5 0 0 1 .5-.5 1.5 1.5 0 1 0 0-3A.5.5 0 0 1 0 6zm4-1v1h1v-1zm1 3v-1H4v1zm7 0v-1h-1v1zm-1-2h1v-1h-1zm-6 3H4v1h1zm7 1v-1h-1v1zm-7 1H4v1h1zm7 1v-1h-1v1zm-8 1v1h1v-1zm7 1h1v-1h-1z"/>
-            </svg></div>
+            <h1 class="mb-4">All Purchases <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-cart-check-fill" viewBox="0 0 16 16">
+                <path d="M.5 1a.5.5 0 0 0 0 1h1.11l.401 1.607 1.498 7.985A.5.5 0 0 0 4 12h1a2 2 0 1 0 0 4 2 2 0 0 0 0-4h7a2 2 0 1 0 0 4 2 2 0 0 0 0-4h1a.5.5 0 0 0 .491-.408l1.5-8A.5.5 0 0 0 14.5 3H2.89l-.405-1.621A.5.5 0 0 0 2 1zM6 14a1 1 0 1 1-2 0 1 1 0 0 1 2 0m7 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0m-1.646-7.646-3 3a.5.5 0 0 1-.708 0l-1.5-1.5a.5.5 0 1 1 .708-.708L8 8.293l2.646-2.647a.5.5 0 0 1 .708.708"/>
+            </svg></h1>
 
         <div class="ticket-grid">
             {% for purchase in purchases %}
                 <div class="ticket-card">
                     <div class="ticket-info">
+                        <div>
+                            <strong>User:</strong> {{ purchase.user.email }}
+                        </div>
                         <div>
                             <strong>Festival:</strong><br>
                             <a href="{{ path('festival_view', { id: purchase.festival.id }) }}" class="festival-link">
@@ -99,12 +108,24 @@
                             <strong>Price:</strong> €{{ purchase.festival.price|number_format(2, '.', ',') }}
                         </div>
                         <div>
-                            <strong>Begins on:</strong> {{ purchase.festival.startDate|date('d M Y') }}
+                            <strong>Date:</strong> {{ purchase.festival.startDate|date('d M Y') }}
                         </div>
                     </div>
+                    <div class="text-center mt-3">
+                        <form method="get" action="{{ path('purchase_delete', { id: purchase.id }) }}" onsubmit="return confirm('Are you sure you want to delete this purchase?');">
+                            <button type="submit" class="btn btn-danger d-inline-flex align-items-center gap-2" style="background-color: #a51313;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
+                                    <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/>
+                                    <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z"/>
+                                </svg>
+                                Delete
+                            </button>
+                        </form>
+                    </div>
                 </div>
+
             {% else %}
-                <p>You have no purchases.</p>
+                <p>No purchases found.</p>
             {% endfor %}
         </div>
 

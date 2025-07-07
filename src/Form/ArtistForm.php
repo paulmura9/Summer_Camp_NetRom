@@ -32,7 +32,7 @@ class ArtistForm extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => Artist::class,
-            'csrf_protection' => true,
+            'csrf_protection' => false,
         ]);
     }
 }

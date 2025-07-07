@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Create new Festival{% endblock %}
+{% block title %}Edit User - {{ user.email }}{% endblock %}
 
 {% block stylesheets %}
     {{ parent() }}
@@ -15,29 +15,28 @@
             padding: 2rem;
             border-radius: 1rem;
             box-shadow: 0 0 20px rgba(0,0,0,0.1);
-            max-width: 700px;
+            max-width: 600px;
             margin: 4rem auto;
         }
 
         .form-card h2 {
             color: #4a0072;
             font-weight: bold;
-            margin-bottom: 1.5rem;
             text-align: center;
+            margin-bottom: 1.5rem;
         }
 
         .form-group {
             margin-bottom: 1rem;
-            text-align: left;
         }
 
         label {
-            font-weight: bold;
+            font-weight: 500;
             display: block;
             margin-bottom: 0.3rem;
         }
 
-        .form-control {
+        .form-control, .form-select {
             width: 100%;
             padding: 0.5rem;
             font-size: 1.05rem;
@@ -83,27 +82,58 @@
             justify-content: space-between;
             margin-top: 2rem;
         }
+
+        .form-error {
+            color: red;
+            font-size: 0.875rem;
+        }
+        .btn-success {
+            background-color: #218838;
+            border: none;
+            padding: 0.5rem 1.2rem;
+            border-radius: 0.5rem;
+            color: white;
+            font-weight: 500;
+        }
+
+        .btn-success:hover {
+            background-color: #1e7e34;
+        }
     </style>
 {% endblock %}
 
 {% block body %}
     <div class="form-card">
-        <h2>Create New Festival</h2>
+        <h2>Edit User Account</h2>
 
         {{ form_start(form) }}
 
-        {% for field in form %}
-            {% if field.vars.name != 'artist' %}
-                <div class="form-group">
-                    {{ form_label(field) }}
-                    {{ form_widget(field, {'attr': {'class': 'form-control'}}) }}
-                    {{ form_errors(field) }}
-                </div>
-            {% endif %}
-        {% endfor %}
+        <div class="form-group">
+            {{ form_label(form.email) }}
+            {{ form_widget(form.email) }}
+            {{ form_errors(form.email) }}
+        </div>
+
+        <div class="form-group">
+            {{ form_label(form.role) }}
+            {{ form_widget(form.role) }}
+            {{ form_errors(form.role) }}
+        </div>
+
+        <div class="form-group">
+            {{ form_label(form.name) }}
+            {{ form_widget(form.name) }}
+            {{ form_errors(form.name) }}
+        </div>
+
+        <div class="form-group">
+            {{ form_label(form.age) }}
+            {{ form_widget(form.age) }}
+            {{ form_errors(form.age) }}
+        </div>
 
         <div class="actions">
-            <a href="{{ path('festivals_list') }}" class="btn-back">
+            <a href="{{ path('user_view', { id: user.id }) }}" class="btn-back">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-arrow-return-left" viewBox="0 0 16 16">
                     <path fill-rule="evenodd" d="M14.5 1.5a.5.5 0 0 1 .5.5v4.8a2.5 2.5 0 0 1-2.5 2.5H2.707l3.347 3.346a.5.5 0 0 1-.708.708l-4.2-4.2a.5.5 0 0 1 0-.708l4-4a.5.5 0 1 1 .708.708L2.707 8.3H12.5A1.5 1.5 0 0 0 14 6.8V2a.5.5 0 0 1 .5-.5"/>
                 </svg>
@@ -120,4 +150,12 @@
 
         {{ form_end(form) }}
     </div>
+{% endblock %}
+{% block javascripts %}
+    <script>
+        if (!sessionStorage.getItem('hasRefreshed')) {
+            sessionStorage.setItem('hasRefreshed', 'true');
+            location.reload();
+        }
+    </script>
 {% endblock %}

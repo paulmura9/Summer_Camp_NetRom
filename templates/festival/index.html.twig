@@ -14,6 +14,11 @@
             font-family: 'Segoe UI', sans-serif;
         }
 
+        h1 {
+            color: #218838;
+            font-weight: bold;
+        }
+
         .festival-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
@@ -30,6 +35,12 @@
             width: 100%;
             max-width: 300px;
             text-align: center;
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+        }
+
+        .festival-card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(0,0,0,0.2);
         }
 
         .festival-card h5 {
@@ -50,6 +61,18 @@
 
         .btn-success:hover {
             background-color: #1e7e34;
+        }
+
+        .btn-create {
+            background-color: #0a5c1d;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 0.5rem;
+        }
+
+        .btn-create:hover {
+            background-color: #5936a3;
         }
 
         .pagination {
@@ -79,12 +102,39 @@
             color: #999;
             border-color: #ccc;
         }
+        .btn-back {
+            background-color: #6f42c1;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .btn-back:hover {
+            background-color: #5936a3;
+            text-decoration: none;
+        }
     </style>
 {% endblock %}
 
 {% block body %}
     <div class="container text-center">
-        <h1 class="mt-4 mb-4">Festivals</h1>
+        <h1 class="mt-4 mb-4">Festivals <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-lightning-charge-fill" viewBox="0 0 16 16">
+                <path d="M11.251.068a.5.5 0 0 1 .227.58L9.677 6.5H13a.5.5 0 0 1 .364.843l-8 8.5a.5.5 0 0 1-.842-.49L6.323 9.5H3a.5.5 0 0 1-.364-.843l8-8.5a.5.5 0 0 1 .615-.09z"/>
+            </svg></h1>
+
+{#        {% for label, messages in app.flashes %}#}
+{#            {% for message in messages %}#}
+{#                <div class="alert alert-{{ label }}">#}
+{#                    {{ message }}#}
+{#                </div>#}
+{#            {% endfor %}#}
+{#        {% endfor %}#}
 
         <div class="festival-grid">
             {% for festival in festivals %}
@@ -94,7 +144,7 @@
                     <a href="{{ path('festival_view', {id: festival.id}) }}" class="btn btn-success">View</a>
                 </div>
             {% else %}
-                <p>Nu există festivaluri.</p>
+                <p>No festivals.</p>
             {% endfor %}
         </div>
 
@@ -109,9 +159,27 @@
                          class="bi bi-plus" viewBox="0 0 16 16">
                         <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4"/>
                     </svg>
-                    Create Festival
+                    Add new Festival
                 </a>
             </div>
         {% endif %}
+
+
+        <div class="text-center mt-4">
+            <a href="{{ path('showtime') }}" class="btn btn-back">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-arrow-return-left" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M14.5 1.5a.5.5 0 0 1 .5.5v4.8a2.5 2.5 0 0 1-2.5 2.5H2.707l3.347 3.346a.5.5 0 0 1-.708.708l-4.2-4.2a.5.5 0 0 1 0-.708l4-4a.5.5 0 1 1 .708.708L2.707 8.3H12.5A1.5 1.5 0 0 0 14 6.8V2a.5.5 0 0 1 .5-.5"/>
+                </svg>
+                Back
+            </a>
+        </div>
     </div>
+{% endblock %}
+{% block javascripts %}
+    <script>
+        if (!sessionStorage.getItem('hasRefreshed')) {
+            sessionStorage.setItem('hasRefreshed', 'true');
+            location.reload();
+        }
+    </script>
 {% endblock %}

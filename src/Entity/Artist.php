@@ -24,7 +24,7 @@ class Artist
     /**
      * @var Collection<int, FestivalArtist>
      */
-    #[ORM\OneToMany(targetEntity: FestivalArtist::class, mappedBy: 'Artist')]
+    #[ORM\OneToMany(targetEntity: FestivalArtist::class, mappedBy: 'artist')]
     private Collection $festivalArtists;
 
     public function __construct()
@@ -89,4 +89,5 @@ class Artist
 
         return $this;
     }
+
 }

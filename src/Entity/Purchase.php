@@ -20,6 +20,7 @@ class Purchase
     private ?User $user = null;
 
     #[ORM\ManyToOne(inversedBy: 'purchases')]
+    #[ORM\JoinColumn(name: 'festival_id', referencedColumnName: 'id', onDelete: 'CASCADE')]
     private ?Festival $festival = null;
 
     public function getId(): ?int

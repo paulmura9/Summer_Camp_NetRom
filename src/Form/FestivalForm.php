@@ -53,23 +53,13 @@ class FestivalForm extends AbstractType
                 ],
             ]);
 
-        if ($options['include_artist']) {
-            $linkedArtists = $options['linked_artists'] ?? [];
-
+        if ($options['include_artist'] ?? false) {
             $builder->add('artist', EntityType::class, [
                 'class' => Artist::class,
+                'choices' => $options['linked_artists'],
                 'choice_label' => 'name',
                 'placeholder' => 'Select an artist',
                 'required' => false,
-                'mapped' => false,
-                'query_builder' => function (EntityRepository $er) use ($linkedArtists) {
-                    $qb = $er->createQueryBuilder('a');
-                    if (!empty($linkedArtists)) {
-                        $qb->where($qb->expr()->notIn('a.id', ':excluded'))
-                            ->setParameter('excluded', $linkedArtists);
-                    }
-                    return $qb->orderBy('a.name', 'ASC');
-                },
             ]);
         }
     }

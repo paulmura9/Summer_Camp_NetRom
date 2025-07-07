@@ -78,6 +78,19 @@
         .edit-btn:hover {
             background-color: #5936a3;
         }
+        .btn-back {
+            background-color: #6f42c1;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            margin-top: 2rem;
+            display: inline-block;
+        }
+
+        .btn-back:hover {
+            background-color: #5936a3;
+        }
     </style>
 {% endblock %}
 
@@ -87,7 +100,7 @@
 
         {% set disableAttr = app.request.query.get('edit') ? {} : {'disabled': 'disabled'} %}
 
-        {{ form_start(form) }}
+        {{ form_start(form, { 'action': path('user_update_details', { id: user.id }) }) }}
 
         <div class="form-group">
             <label>Email:</label>
@@ -101,26 +114,59 @@
 
         <div class="form-group">
             {{ form_label(form.name) }}
-            {{ form_widget(form.name, {
-                attr: disableAttr|merge({ 'class': 'form-control' })
-            }) }}
+            {{ form_widget(form.name, { attr: disableAttr|merge({'class': 'form-control'}) }) }}
         </div>
 
         <div class="form-group">
             {{ form_label(form.age) }}
-            {{ form_widget(form.age, {
-                attr: disableAttr|merge({ 'class': 'form-control' })
-            }) }}
+            {{ form_widget(form.age, { attr: disableAttr|merge({'class': 'form-control'}) }) }}
         </div>
 
-        {% if app.request.query.get('edit') %}
+        {% if is_granted('ROLE_USER') and app.request.query.get('edit') %}
             <button type="submit" class="btn btn-success">Apply Settings</button>
-        {% else %}
-            <a href="{{ path(app.request.attributes.get('_route'), app.request.attributes.get('_route_params')|merge({'edit': 1})) }}" class="edit-btn">
-                Edit Account Details
-            </a>
         {% endif %}
 
         {{ form_end(form) }}
+
+        {% if is_granted('ROLE_USER') and not app.request.query.get('edit') %}
+            <a href="{{ path(app.request.attributes.get('_route'), app.request.attributes.get('_route_params')|merge({'edit': 1})) }}" class="edit-btn">
+                Edit Account Details
+            </a>
+
+            <div class="text-center mt-4">
+                <a href="{{ path('showtime') }}" class="btn btn-back">Back</a>
+            </div>
+        {% endif %}
+
+        {% if is_granted('ROLE_ADMIN') %}
+            <div class="admin-buttons mt-4 d-flex justify-content-center gap-3">
+
+                <a href="{{ path('user_edit', { id: user.id }) }}" class="btn btn-primary d-inline-flex align-items-center gap-2" style="background-color: #0c4897;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pen" viewBox="0 0 16 16">
+                        <path d="m13.498.795.149-.149a1.207 1.207 0 1 1 1.707 1.708l-.149.148a1.5 1.5 0 0 1-.059 2.059L4.854 14.854a.5.5 0 0 1-.233.131l-4 1a.5.5 0 0 1-.606-.606l1-4a.5.5 0 0 1 .131-.232l9.642-9.642a.5.5 0 0 0-.642.056L6.854 4.854a.5.5 0 1 1-.708-.708L9.44.854A1.5 1.5 0 0 1 11.5.796a1.5 1.5 0 0 1 1.998-.001m-.644.766a.5.5 0 0 0-.707 0L1.95 11.756l-.764 3.057 3.057-.764L14.44 3.854a.5.5 0 0 0 0-.708z"/>
+                    </svg>
+                    Edit
+                </a>
+
+                <form method="get" action="{{ path('user_delete', { id: user.id }) }}" onsubmit="return confirm('Are you sure you want to delete this user?');">
+                    <button type="submit" class="btn btn-danger d-inline-flex align-items-center gap-2" style="background-color: #a51313;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
+                            <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/>
+                            <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z"/>
+                        </svg>
+                        Delete
+                    </button>
+                </form>
+
+            </div>
+
+            <a href="{{ path('festivals_list') }}" class="btn btn-back mt-4 d-inline-flex align-items-center gap-2 text-decoration-none">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-arrow-return-left" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M14.5 1.5a.5.5 0 0 1 .5.5v4.8a2.5 2.5 0 0 1-2.5 2.5H2.707l3.347 3.346a.5.5 0 0 1-.708.708l-4.2-4.2a.5.5 0 0 1 0-.708l4-4a.5.5 0 1 1 .708.708L2.707 8.3H12.5A1.5 1.5 0 0 0 14 6.8V2a.5.5 0 0 1 .5-.5"/>
+                </svg>
+                Back to list
+            </a>
+        {% endif %}
     </div>
+
 {% endblock %}

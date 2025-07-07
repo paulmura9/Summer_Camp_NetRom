@@ -2,31 +2,181 @@
 
 {% block title %}Artist - {{ artist.name }}{% endblock %}
 
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        html, body {
+            background-color: #99dab0;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        .artist-card {
+            background-color: #cec4ec;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            max-width: 600px;
+            margin: 4rem auto;
+        }
+
+        .artist-card h2 {
+            color: #4a0072;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+
+        .form-group {
+            text-align: left;
+            margin-bottom: 1rem;
+        }
+
+        label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 0.25rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.4rem;
+            font-size: 1.1rem;
+            border-radius: 0.4rem;
+            border: 1px solid #ced4da;
+            background-color: #d5c5f1;
+            color: #4a0072;
+        }
+
+        .form-control[disabled] {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .btn-success {
+            background-color: #218838;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            color: white;
+            margin-top: 1rem;
+        }
+
+        .btn-success:hover {
+            background-color: #1e7e34;
+        }
+
+        .edit-btn {
+            background-color: #6f42c1;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            margin-top: 1rem;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .edit-btn:hover {
+            background-color: #5936a3;
+        }
+
+        .badge-festival {
+            background-color: #28a745;
+            color: white;
+            padding: 0.4rem 0.75rem;
+            border-radius: 0.75rem;
+            margin: 0.25rem;
+            display: inline-block;
+            font-weight: 500;
+            text-decoration: none;
+            transition: transform 0.2s ease;
+        }
+
+        .badge-festival:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 10px rgba(0,0,0,0.2);
+        }
+
+        .admin-buttons {
+            margin-top: 1.5rem;
+        }
+
+        .admin-buttons .btn {
+            margin: 0 0.5rem;
+        }
+
+        .btn-back {
+            background-color: #6f42c1;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            margin-top: 2rem;
+            display: inline-block;
+        }
+
+        .btn-back:hover {
+            background-color: #5936a3;
+        }
+    </style>
+{% endblock %}
+
 {% block body %}
-    <div class="container mt-4">
-        <h2 class="mb-4 text-primary-emphasis">{{ artist.name }}</h2>
+    <div class="artist-card text-center">
+        <h2>{{ artist.name }}</h2>
 
-        <ul class="list-group">
-            <li class="list-group-item"><strong>ID:</strong> {{ artist.id }}</li>
-            <li class="list-group-item"><strong>Name:</strong> {{ artist.name }}</li>
-            <li class="list-group-item"><strong>Genre:</strong> {{ artist.musicalGenre }}</li>
-        </ul>
+        <div class="form-group">
+            <label>Name</label>
+            <input type="text" class="form-control" value="{{ artist.name }}" disabled />
+        </div>
 
-        <a href="{{ path('artists_list') }}" class="btn btn-secondary mt-3">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-return-left" viewBox="0 0 16 16">
+        <div class="form-group">
+            <label>Musical Genre</label>
+            <input type="text" class="form-control" value="{{ artist.musicalGenre }}" disabled />
+        </div>
+
+        <h4 class="mt-4">Festivals this artist is part of</h4>
+
+        {% if artist.festivalArtists|length > 0 %}
+            <div class="d-flex flex-wrap justify-content-center mt-2">
+                {% for fa in artist.festivalArtists %}
+                    {% if fa.festival %}
+                        <a href="{{ path('festival_view', { id: fa.festival.id }) }}" class="badge-festival">
+                            {{ fa.festival.name }}
+                        </a>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="text-muted">This artist is not assigned to any festivals.</p>
+        {% endif %}
+
+        {% if is_granted('ROLE_ADMIN') %}
+            <div class="admin-buttons mt-4 d-flex justify-content-center gap-3">
+                <a href="{{ path('artist_edit', { id: artist.id }) }}" class="btn btn-primary d-inline-flex align-items-center gap-2" style="background-color: #0c4897;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pen" viewBox="0 0 16 16">
+                        <path d="m13.498.795.149-.149a1.207 1.207 0 1 1 1.707 1.708l-.149.148a1.5 1.5 0 0 1-.059 2.059L4.854 14.854a.5.5 0 0 1-.233.131l-4 1a.5.5 0 0 1-.606-.606l1-4a.5.5 0 0 1 .131-.232l9.642-9.642a.5.5 0 0 0-.642.056L6.854 4.854a.5.5 0 1 1-.708-.708L9.44.854A1.5 1.5 0 0 1 11.5.796a1.5 1.5 0 0 1 1.998-.001m-.644.766a.5.5 0 0 0-.707 0L1.95 11.756l-.764 3.057 3.057-.764L14.44 3.854a.5.5 0 0 0 0-.708z"/>
+                    </svg>
+                    Edit
+                </a>
+
+                <form method="get" action="{{ path('artist_delete', { id: artist.id }) }}" onsubmit="return confirm('Are you sure you want to delete this artist?');">
+                    <button type="submit" class="btn btn-danger d-inline-flex align-items-center gap-2" style="background-color: #a51313;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
+                            <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/>
+                            <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z"/>
+                        </svg>
+                        Delete
+                    </button>
+                </form>
+            </div>
+        {% endif %}
+
+        <a href="{{ path('artists_list') }}" class="btn btn-back mt-4 d-inline-flex align-items-center gap-2 text-decoration-none">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-arrow-return-left" viewBox="0 0 16 16">
                 <path fill-rule="evenodd" d="M14.5 1.5a.5.5 0 0 1 .5.5v4.8a2.5 2.5 0 0 1-2.5 2.5H2.707l3.347 3.346a.5.5 0 0 1-.708.708l-4.2-4.2a.5.5 0 0 1 0-.708l4-4a.5.5 0 1 1 .708.708L2.707 8.3H12.5A1.5 1.5 0 0 0 14 6.8V2a.5.5 0 0 1 .5-.5"/>
             </svg>
-            Back
+            Back to list
         </a>
 
-        <form method="get" action="{{ path('artist_delete', { id: artist.id }) }}">
-            <button class="btn btn-danger mt-3" onclick="return confirm('Ești sigur că vrei să ștergi acest artist?');">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
-                    <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/>
-                    <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z"/>
-                </svg>
-                Delete
-            </button>
-        </form>
     </div>
 {% endblock %}

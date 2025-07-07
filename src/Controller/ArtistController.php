@@ -8,6 +8,7 @@ use App\Repository\ArtistRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -35,9 +36,8 @@ final class ArtistController extends AbstractController
             'artists' => $artists
         ]);
     }
-
     #[Route('/artist/{id}', name: 'artist_view', requirements: ['id' => '\d+'], methods: ['GET'])]
-    public function view(EntityManagerInterface $em, int $id): Response
+    public function view(int $id, EntityManagerInterface $em, Request $request): Response
     {
         $artist = $em->getRepository(Artist::class)->find($id);
 
@@ -45,10 +45,14 @@ final class ArtistController extends AbstractController
             throw $this->createNotFoundException('Artist not found');
         }
 
+        $form = $this->createForm(ArtistForm::class, $artist);
+
         return $this->render('artist/view.html.twig', [
-            'artist' => $artist
+            'artist' => $artist,
+            'form' => $form->createView(),
         ]);
     }
+
 
     #[Route('/artist/delete/{id}', name: 'artist_delete', requirements: ['id' => '\d+'], methods: ['GET'])]
     public function delete(EntityManagerInterface $em, int $id): Response
@@ -56,14 +60,18 @@ final class ArtistController extends AbstractController
         $artist = $em->getRepository(Artist::class)->find($id);
 
         if (!$artist) {
-            $this->addFlash('error', 'Artistul nu a fost găsit.');
+            $this->addFlash('error', 'Artist not found');
             return $this->redirectToRoute('artists_list');
+        }
+
+        foreach ($artist->getFestivalArtists() as $relation) {
+            $em->remove($relation);
         }
 
         $em->remove($artist);
         $em->flush();
 
-        $this->addFlash('success', 'Artistul a fost șters cu succes.');
+        $this->addFlash('success', 'Artist deleted successfully.');
         return $this->redirectToRoute('artists_list');
     }
 
@@ -85,6 +93,27 @@ final class ArtistController extends AbstractController
 
         return $this->render('artist/create.html.twig', [
             'form' => $form->createView(),
+        ]);
+    }
+
+    #[Route('/artist/edit/{id}', name: 'artist_edit', methods: ['GET', 'POST'])]
+    public function edit(
+        Request $request,
+        Artist $artist,
+        EntityManagerInterface $em
+    ): Response {
+        $form = $this->createForm(ArtistForm::class, $artist);
+
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $em->flush();
+            $this->addFlash('success', 'Artist updated successfully.');
+            return $this->redirectToRoute('artist_view', ['id' => $artist->getId()]);
+        }
+
+        return $this->render('artist/edit.html.twig', [
+            'form' => $form->createView(),
+            'artist' => $artist,
         ]);
     }
 }

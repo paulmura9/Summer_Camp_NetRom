@@ -35,10 +35,6 @@ class UserForm extends AbstractType
                 'constraints' => [
                     new Assert\NotBlank(),
                 ],
-            ])
-            ->add('token', TextType::class, [
-                'attr' => ['placeholder' => 'Enter token'],
-                'required' => false,
             ]);
     }
 
