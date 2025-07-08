@@ -112,7 +112,29 @@ final class FestivalController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $artistIdsToRemove = $request->request->all('remove_artists') ?? [];
+            $artistIdsToAdd = $request->request->all('linked_artists') ?? [];
+
+            foreach ($festival->getFestivalArtists() as $fa) {
+                if (in_array($fa->getArtist()->getId(), $artistIdsToRemove)) {
+                    $em->remove($fa);
+                }
+            }
+
+            foreach ($artistIdsToAdd as $artistId) {
+                if (!in_array((int)$artistId, $linkedArtistIds) && !in_array($artistId, $artistIdsToRemove)) {
+                    $artist = $artistRepo->find($artistId);
+                    if ($artist) {
+                        $newLink = new \App\Entity\FestivalArtist();
+                        $newLink->setFestival($festival);
+                        $newLink->setArtist($artist);
+                        $em->persist($newLink);
+                    }
+                }
+            }
+
             $em->flush();
+
             $this->addFlash('success', 'Festival updated');
             return $this->redirectToRoute('festival_view', ['id' => $festival->getId()]);
         }
@@ -128,25 +150,6 @@ final class FestivalController extends AbstractController
         ]);
     }
 
-    #[Route('/festival/{festival_id}/remove-artist/{artist_id}', name: 'festival_remove_artist', methods: ['POST'])]
-    public function removeArtist(
-        int $festival_id,
-        int $artist_id,
-        EntityManagerInterface $em,
-        FestivalArtistRepository $faRepo
-    ): Response {
-        $link = $faRepo->findOneBy([
-            'festival' => $festival_id,
-            'artist' => $artist_id,
-        ]);
-
-        if ($link) {
-            $em->remove($link);
-            $em->flush();
-        }
-
-        return $this->redirectToRoute('festival_edit', ['id' => $festival_id]);
-    }
 
     #[Route('/festival/{festival_id}/add-artist/{artist_id}', name: 'festival_add_artist', methods: ['POST'])]
     public function addArtist(
@@ -171,6 +174,36 @@ final class FestivalController extends AbstractController
         }
 
         return $this->redirectToRoute('festival_edit', ['id' => $festival_id]);
+    }
+
+    #[Route('/festivals/search', name: 'festival_list', methods: ['GET'])]
+    public function list(Request $request, FestivalRepository $festivalRepository, PaginatorInterface $paginator): Response
+    {
+        $searchTerm = $request->query->get('q');
+
+        $qb = $festivalRepository->createQueryBuilder('f');
+
+        if ($searchTerm) {
+            $qb->andWhere(
+                $qb->expr()->orX(
+                    $qb->expr()->like('LOWER(f.name)', ':search'),
+                    $qb->expr()->like('LOWER(f.location)', ':search')
+                )
+            )
+                ->setParameter('search', '%' . strtolower($searchTerm) . '%');
+        }
+
+        $qb->orderBy('f.start_date', 'ASC');
+
+        $pagination = $paginator->paginate(
+            $qb->getQuery(),
+            $request->query->getInt('page', 1),
+            12
+        );
+
+        return $this->render('festival/index.html.twig', [
+            'festivals' => $pagination
+        ]);
     }
 
 }

@@ -14,7 +14,7 @@
             background-color: #cec4ec;
             padding: 2rem;
             border-radius: 1rem;
-            max-width: 600px;
+            max-width: 700px;
             margin: 3rem auto;
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
         }
@@ -65,10 +65,87 @@
             background-color: #5936a3;
             text-decoration: none;
         }
+
         .actions {
             display: flex;
             justify-content: space-between;
             margin-top: 2rem;
+        }
+
+        .badge-festival {
+            background-color: #17a2b8;
+            color: white;
+            padding: 0.4rem 0.75rem;
+            border-radius: 0.75rem;
+            margin: 0.25rem;
+            display: inline-flex;
+            align-items: center;
+            font-weight: 500;
+        }
+
+        .badge-festival button {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1rem;
+            margin-left: 0.5rem;
+            cursor: pointer;
+        }
+
+        .badge-add {
+            background-color: #4a0072;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            font-size: 20px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0.25rem;
+            cursor: pointer;
+        }
+
+        .badge-add span {
+            position: relative;
+            top: -2px;
+        }
+
+        .dropdown-festivals {
+            display: none;
+            flex-wrap: wrap;
+            margin-top: 0.5rem;
+        }
+
+        .dropdown-festivals .badge-festival {
+            background-color: #218838;
+            cursor: pointer;
+        }
+
+        .file-upload-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .file-input {
+            flex: 1;
+        }
+
+        .file-clear-btn {
+            background-color: #4a0072;
+            color: white;
+            border: none;
+            font-weight: bold;
+            font-size: 1.2rem;
+            padding: 0 0.6rem;
+            border-radius: 0.3rem;
+            cursor: pointer;
+        }
+
+        .file-clear-btn:hover {
+            background-color: #36005c;
         }
     </style>
 {% endblock %}
@@ -95,6 +172,39 @@
             {{ form_errors(form.musical_genre) }}
         </div>
 
+        <div class="mb-3">
+            {{ form_label(form.image) }}
+            {{ form_widget(form.image, {'attr': {'class': 'form-control'}}) }}
+            {{ form_errors(form.image) }}
+        </div>
+
+        <div class="mt-4">
+            <h5>Festivals</h5>
+            <div class="d-flex flex-wrap align-items-center" id="linked-festivals">
+                {% for fa in linked_festivals %}
+                    <label class="badge-festival" id="festival-{{ fa.id }}">
+                        {{ fa.name }}
+                        <input type="hidden" name="linked_festivals[]" value="{{ fa.id }}">
+                        <input type="checkbox" name="remove_festivals[]" value="{{ fa.id }}" style="display: none;" onchange="this.closest('label').style.display = this.checked ? 'none' : 'inline-flex';">
+                        <button type="button" onclick="this.previousElementSibling.checked = true; this.previousElementSibling.dispatchEvent(new Event('change'))">&times;</button>
+                    </label>
+                {% endfor %}
+                <button type="button" class="badge-add" onclick="toggleFestivalDropdown()">
+                    <span>+</span>
+                </button>
+            </div>
+
+            <div class="dropdown-festivals" id="dropdown-festivals">
+                {% for fest in available_festivals %}
+                    <button type="button" class="badge-festival" data-id="{{ fest.id }}" data-name="{{ fest.name }}" onclick="addFestival(this)">
+                        {{ fest.name }}
+                    </button>
+                {% else %}
+                    <p class="text-muted">No more available festivals.</p>
+                {% endfor %}
+            </div>
+        </div>
+
         <div class="actions">
             <a href="{{ path('artist_view', { id: artist.id }) }}" class="btn-back">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-return-left" viewBox="0 0 16 16">
@@ -110,13 +220,50 @@
                 Apply changes
             </button>
         </div>
+
+        {{ form_end(form) }}
     </div>
 {% endblock %}
+
 {% block javascripts %}
     <script>
-        if (!sessionStorage.getItem('hasRefreshed')) {
-            sessionStorage.setItem('hasRefreshed', 'true');
-            location.reload();
+        function toggleFestivalDropdown() {
+            const dropdown = document.getElementById('dropdown-festivals');
+            dropdown.style.display = dropdown.style.display === 'flex' ? 'none' : 'flex';
+        }
+
+        function addFestival(button) {
+            const id = button.getAttribute('data-id');
+            const name = button.getAttribute('data-name');
+
+            if (document.getElementById('festival-' + id)) return;
+
+            const label = document.createElement('label');
+            label.className = 'badge-festival';
+            label.id = 'festival-' + id;
+            label.innerHTML = `
+                ${name}
+                <input type="hidden" name="linked_festivals[]" value="${id}">
+                <input type="checkbox" name="remove_festivals[]" value="${id}" style="display:none" onchange="this.closest('label').style.display = this.checked ? 'none' : 'inline-flex';">
+                <button type="button" onclick="this.previousElementSibling.checked = true; this.previousElementSibling.dispatchEvent(new Event('change'))">&times;</button>
+            `;
+
+            const container = document.getElementById('linked-festivals');
+            const addBtn = container.querySelector('.badge-add');
+            container.insertBefore(label, addBtn);
+
+            button.remove();
+
+            if (document.querySelectorAll('#dropdown-festivals .badge-festival').length === 0) {
+                document.getElementById('dropdown-festivals').style.display = 'none';
+            }
+        }
+        function clearFileInput(button) {
+            const wrapper = button.closest('.file-upload-wrapper');
+            const input = wrapper.querySelector('input[type="file"]');
+            if (input) {
+                input.value = '';
+            }
         }
     </script>
 {% endblock %}

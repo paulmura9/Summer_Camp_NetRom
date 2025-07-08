@@ -15,8 +15,9 @@
         }
 
         h1 {
-            color: #218838;
+            color: #8225bc;
             font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
         }
 
         .artist-grid {
@@ -28,14 +29,32 @@
         }
 
         .artist-card {
-            background-color: #cec4ec;
-            padding: 1.5rem;
+            position: relative;
+            background-color: transparent;
+            padding: 2rem;
             border-radius: 1rem;
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
             width: 100%;
             max-width: 300px;
             text-align: center;
             transition: transform 0.25s ease, box-shadow 0.25s ease;
+            cursor: pointer;
+            background-size: cover;
+            background-position: center;
+            overflow: hidden;
+        }
+
+        .artist-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 0;
+        }
+
+        .artist-card > * {
+            position: relative;
+            z-index: 1;
         }
 
         .artist-card:hover {
@@ -44,25 +63,17 @@
         }
 
         .artist-card h5 {
-            color: #4a0072;
+            color: white;
             margin-bottom: 0.25rem;
             font-weight: bold;
+            text-decoration: none;
         }
 
         .artist-card .genre {
             font-size: 0.9rem;
-            color: #444;
+            color: #ffc107;
             margin-bottom: 0.75rem;
-        }
-
-        .btn-success {
-            background-color: #218838;
-            border-color: #1e7e34;
-            border-radius: 0.4rem;
-        }
-
-        .btn-success:hover {
-            background-color: #1e7e34;
+            text-decoration: none;
         }
 
         .btn-create {
@@ -121,6 +132,34 @@
             background-color: #5936a3;
             text-decoration: none;
         }
+        .input-group {
+            display: flex;
+            align-items: stretch;
+            justify-content: center;
+        }
+
+        .input-group input[type="text"] {
+            font-size: 1.25rem;
+            padding: 0.75rem 1.25rem;
+            border-radius: 50px 0 0 50px;
+            border: 2px solid #4a0072;
+            outline: none;
+            width: 50%;
+        }
+
+        .input-group button {
+            padding: 0 1.25rem;
+            font-size: 1.25rem;
+            border-radius: 0 50px 50px 0;
+            border: 2px solid #4a0072;
+            background-color: #4a0072;
+            color: white;
+            cursor: pointer;
+        }
+
+        .input-group button:hover {
+            background-color: #5936a3;
+        }
     </style>
 {% endblock %}
 
@@ -131,13 +170,32 @@
                 <path d="M3.5 6.5A.5.5 0 0 1 4 7v1a4 4 0 0 0 8 0V7a.5.5 0 0 1 1 0v1a5 5 0 0 1-4.5 4.975V15h3a.5.5 0 0 1 0 1h-7a.5.5 0 0 1 0-1h3v-2.025A5 5 0 0 1 3 8V7a.5.5 0 0 1 .5-.5"/>
             </svg></h1>
 
+        <form method="get" action="{{ path('artist_list') }}" class="mb-5">
+            <div class="input-group">
+                <input type="text" name="q" value="{{ app.request.get('q') }}" placeholder="Search artist...">
+                <button type="submit">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor"
+                         class="bi bi-search" viewBox="0 0 16 16" style="margin-top: -6px; margin-left: -5px;">
+                        <path
+                            d="M10.442 10.442a1 1 0 0 1 1.415 0l3.85 3.85a1 1 0 0 1-1.415 1.415l-3.85-3.85a1 1 0 0 1 0-1.415z"/>
+                        <path
+                            d="M6.5 12a5.5 5.5 0 1 1 0-11 5.5 5.5 0 0 1 0 11zm0-1A4.5 4.5 0 1 0 6.5 2a4.5 4.5 0 0 0 0 9z"/>
+                    </svg>
+                </button>
+            </div>
+        </form>
+
+        {% if app.request.get('q') %}
+            <p class="fs-4 fw-bold">Found {{ artists.getTotalItemCount() }} results for "<strong>{{ app.request.get('q') }}</strong>"</p>
+        {% endif %}
+
         <div class="artist-grid">
             {% for artist in artists %}
-                <div class="artist-card">
+                {% set bg = artist.image ? asset('uploads/artists/' ~ artist.image) : null %}
+                <a href="{{ path('artist_view', {id: artist.id}) }}" class="artist-card" style="{% if bg %}background-image: url('{{ bg }}'){% endif %}; text-decoration: none;">
                     <h5>{{ artist.name }}</h5>
                     <div class="genre">{{ artist.musicalGenre }}</div>
-                    <a href="{{ path('artist_view', {id: artist.id}) }}" class="btn btn-success">View</a>
-                </div>
+                </a>
             {% else %}
                 <p>No artists available.</p>
             {% endfor %}

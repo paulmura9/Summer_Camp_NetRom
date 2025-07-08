@@ -15,8 +15,10 @@
         }
 
         h1 {
-            color: #218838;
+            color: #8225bc;
             font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+
         }
 
         .festival-grid {
@@ -102,6 +104,7 @@
             color: #999;
             border-color: #ccc;
         }
+
         .btn-back {
             background-color: #6f42c1;
             color: white;
@@ -119,22 +122,64 @@
             background-color: #5936a3;
             text-decoration: none;
         }
+
+        .input-group {
+            display: flex;
+            align-items: stretch;
+            justify-content: center;
+        }
+
+        .input-group input[type="text"] {
+            font-size: 1.25rem;
+            padding: 0.75rem 1.25rem;
+            border-radius: 50px 0 0 50px;
+            border: 2px solid #4a0072;
+            outline: none;
+            width: 50%;
+        }
+
+        .input-group button {
+            padding: 0 1.25rem;
+            font-size: 1.25rem;
+            border-radius: 0 50px 50px 0;
+            border: 2px solid #4a0072;
+            background-color: #4a0072;
+            color: white;
+            cursor: pointer;
+        }
+
+        .input-group button:hover {
+            background-color: #5936a3;
+        }
     </style>
 {% endblock %}
 
 {% block body %}
     <div class="container text-center">
-        <h1 class="mt-4 mb-4">Festivals <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-lightning-charge-fill" viewBox="0 0 16 16">
+        <h1 class="mt-4 mb-4">Festivals
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-lightning-charge-fill" viewBox="0 0 16 16">
                 <path d="M11.251.068a.5.5 0 0 1 .227.58L9.677 6.5H13a.5.5 0 0 1 .364.843l-8 8.5a.5.5 0 0 1-.842-.49L6.323 9.5H3a.5.5 0 0 1-.364-.843l8-8.5a.5.5 0 0 1 .615-.09z"/>
-            </svg></h1>
+            </svg>
+        </h1>
 
-{#        {% for label, messages in app.flashes %}#}
-{#            {% for message in messages %}#}
-{#                <div class="alert alert-{{ label }}">#}
-{#                    {{ message }}#}
-{#                </div>#}
-{#            {% endfor %}#}
-{#        {% endfor %}#}
+        <form method="get" action="{{ path('festival_list') }}" class="mb-5">
+            <div class="input-group">
+                <input type="text" name="q" value="{{ app.request.get('q') }}" placeholder="Search festivals...">
+                <button type="submit">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor"
+                         class="bi bi-search" viewBox="0 0 16 16"  style="margin-top: -6px; margin-left: -5px;">
+                        <path
+                            d="M10.442 10.442a1 1 0 0 1 1.415 0l3.85 3.85a1 1 0 0 1-1.415 1.415l-3.85-3.85a1 1 0 0 1 0-1.415z"/>
+                        <path
+                            d="M6.5 12a5.5 5.5 0 1 1 0-11 5.5 5.5 0 0 1 0 11zm0-1A4.5 4.5 0 1 0 6.5 2a4.5 4.5 0 0 0 0 9z"/>
+                    </svg>
+                </button>
+            </div>
+        </form>
+
+        {% if app.request.get('q') %}
+            <p class="fs-4 fw-bold">Found {{ festivals.getTotalItemCount() }} results for "<strong>{{ app.request.get('q') }}</strong>"</p>
+        {% endif %}
 
         <div class="festival-grid">
             {% for festival in festivals %}
@@ -144,7 +189,7 @@
                     <a href="{{ path('festival_view', {id: festival.id}) }}" class="btn btn-success">View</a>
                 </div>
             {% else %}
-                <p>No festivals.</p>
+                <p>No festivals found.</p>
             {% endfor %}
         </div>
 
@@ -164,7 +209,6 @@
             </div>
         {% endif %}
 
-
         <div class="text-center mt-4">
             <a href="{{ path('showtime') }}" class="btn btn-back">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-arrow-return-left" viewBox="0 0 16 16">
@@ -175,6 +219,7 @@
         </div>
     </div>
 {% endblock %}
+
 {% block javascripts %}
     <script>
         if (!sessionStorage.getItem('hasRefreshed')) {

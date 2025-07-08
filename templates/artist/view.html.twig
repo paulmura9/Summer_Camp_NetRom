@@ -11,72 +11,48 @@
         }
 
         .artist-card {
-            background-color: #cec4ec;
+            position: relative;
+            background-image: var(--bg-image);
+            background-size: cover;
+            background-position: center;
             padding: 2rem;
             border-radius: 1rem;
             box-shadow: 0 0 20px rgba(0,0,0,0.1);
-            max-width: 600px;
+            max-width: 700px;
             margin: 4rem auto;
+            overflow: hidden;
+        }
+
+        /* Overlay negru semi-transparent */
+        .artist-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 0;
+        }
+
+        .artist-card > * {
+            position: relative;
+            z-index: 1;
         }
 
         .artist-card h2 {
-            color: #4a0072;
-            font-weight: bold;
-            margin-bottom: 1rem;
-        }
-
-        .form-group {
-            text-align: left;
-            margin-bottom: 1rem;
-        }
-
-        label {
-            font-weight: bold;
-            display: block;
-            margin-bottom: 0.25rem;
-        }
-
-        .form-control {
-            width: 100%;
-            padding: 0.4rem;
-            font-size: 1.1rem;
-            border-radius: 0.4rem;
-            border: 1px solid #ced4da;
-            background-color: #d5c5f1;
-            color: #4a0072;
-        }
-
-        .form-control[disabled] {
-            opacity: 0.7;
-            cursor: not-allowed;
-        }
-
-        .btn-success {
-            background-color: #218838;
-            border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 0.5rem;
             color: white;
-            margin-top: 1rem;
+            font-weight: bold;
+            margin-bottom: 1.5rem;
         }
 
-        .btn-success:hover {
-            background-color: #1e7e34;
-        }
-
-        .edit-btn {
-            background-color: #6f42c1;
-            color: white;
-            border: none;
-            padding: 0.5rem 1rem;
+        .list-group-item {
+            background-color: rgba(255,255,255,0.2);
+            border: 1px solid #d0c1e7;
             border-radius: 0.5rem;
-            margin-top: 1rem;
-            text-decoration: none;
-            display: inline-block;
+            margin-bottom: 0.5rem;
+            color: white;
         }
 
-        .edit-btn:hover {
-            background-color: #5936a3;
+        .list-group-item strong {
+            color: #ffc107;
         }
 
         .badge-festival {
@@ -88,20 +64,12 @@
             display: inline-block;
             font-weight: 500;
             text-decoration: none;
-            transition: transform 0.2s ease;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
 
         .badge-festival:hover {
             transform: scale(1.1);
             box-shadow: 0 0 10px rgba(0,0,0,0.2);
-        }
-
-        .admin-buttons {
-            margin-top: 1.5rem;
-        }
-
-        .admin-buttons .btn {
-            margin: 0 0.5rem;
         }
 
         .btn-back {
@@ -117,24 +85,40 @@
         .btn-back:hover {
             background-color: #5936a3;
         }
+
+        .admin-buttons {
+            margin-top: 1.5rem;
+        }
+
+        .admin-buttons .btn {
+            margin: 0 0.5rem;
+        }
+
+        .alert {
+            margin-top: 1rem;
+        }
     </style>
 {% endblock %}
 
 {% block body %}
-    <div class="artist-card text-center">
+    {% set bgImage = artist.image ? asset('uploads/artists/' ~ artist.image) : asset('images/default.jpg') %}
+    <div class="artist-card text-center" style="--bg-image: url('{{ bgImage }}')">
         <h2>{{ artist.name }}</h2>
 
-        <div class="form-group">
-            <label>Name</label>
-            <input type="text" class="form-control" value="{{ artist.name }}" disabled />
-        </div>
+        {% for label, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="alert alert-{{ label }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endfor %}
 
-        <div class="form-group">
-            <label>Musical Genre</label>
-            <input type="text" class="form-control" value="{{ artist.musicalGenre }}" disabled />
-        </div>
+        <ul class="list-group text-start">
+            <li class="list-group-item"><strong>Name:</strong> {{ artist.name }}</li>
+            <li class="list-group-item"><strong>Musical Genre:</strong> {{ artist.musicalGenre }}</li>
+        </ul>
 
-        <h4 class="mt-4">Festivals this artist is part of</h4>
+        <h4 class="mt-4 text-white">Performs at</h4>
 
         {% if artist.festivalArtists|length > 0 %}
             <div class="d-flex flex-wrap justify-content-center mt-2">
@@ -147,7 +131,7 @@
                 {% endfor %}
             </div>
         {% else %}
-            <p class="text-muted">This artist is not assigned to any festivals.</p>
+            <p class="text-light">This artist is not assigned to any festivals.</p>
         {% endif %}
 
         {% if is_granted('ROLE_ADMIN') %}
@@ -177,6 +161,5 @@
             </svg>
             Back to list
         </a>
-
     </div>
 {% endblock %}

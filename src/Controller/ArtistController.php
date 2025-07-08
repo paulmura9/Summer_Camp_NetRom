@@ -5,13 +5,16 @@ namespace App\Controller;
 use App\Entity\Artist;
 use App\Form\ArtistForm;
 use App\Repository\ArtistRepository;
+use App\Repository\FestivalRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormFactoryInterface;
+use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\String\Slugger\SluggerInterface;
 
 final class ArtistController extends AbstractController
 {
@@ -100,20 +103,103 @@ final class ArtistController extends AbstractController
     public function edit(
         Request $request,
         Artist $artist,
-        EntityManagerInterface $em
+        EntityManagerInterface $em,
+        FestivalRepository $festivalRepo,
+        SluggerInterface $slugger
     ): Response {
         $form = $this->createForm(ArtistForm::class, $artist);
-
         $form->handleRequest($request);
+
+        $linkedFestivalIds = $artist->getFestivalArtists()
+            ->map(fn($fa) => $fa->getFestival()?->getId())
+            ->filter(fn($id) => $id !== null)
+            ->toArray();
+
         if ($form->isSubmitted() && $form->isValid()) {
+            $imageFile = $form->get('image')->getData();
+
+            if ($imageFile) {
+                $originalFilename = pathinfo($imageFile->getClientOriginalName(), PATHINFO_FILENAME);
+                $safeFilename = $slugger->slug($originalFilename);
+                $newFilename = $safeFilename . '-' . uniqid() . '.' . $imageFile->guessExtension();
+
+                try {
+                    $imageFile->move(
+                        $this->getParameter('artist_images_directory'),
+                        $newFilename
+                    );
+                    $artist->setImage($newFilename);
+                } catch (FileException $e) {
+                    $this->addFlash('danger', 'Failed to upload image: ' . $e->getMessage());
+                }
+            }
+
+            $festivalIdsToRemove = $request->request->all('remove_festivals') ?? [];
+            $festivalIdsToAdd = $request->request->all('linked_festivals') ?? [];
+
+            foreach ($artist->getFestivalArtists() as $fa) {
+                if (in_array($fa->getFestival()->getId(), $festivalIdsToRemove)) {
+                    $em->remove($fa);
+                }
+            }
+
+            foreach ($festivalIdsToAdd as $festivalId) {
+                if (!in_array((int)$festivalId, $linkedFestivalIds) && !in_array($festivalId, $festivalIdsToRemove)) {
+                    $festival = $festivalRepo->find($festivalId);
+                    if ($festival) {
+                        $newLink = new \App\Entity\FestivalArtist();
+                        $newLink->setArtist($artist);
+                        $newLink->setFestival($festival);
+                        $em->persist($newLink);
+                    }
+                }
+            }
+
             $em->flush();
+
             $this->addFlash('success', 'Artist updated successfully.');
             return $this->redirectToRoute('artist_view', ['id' => $artist->getId()]);
         }
 
+        $allFestivals = $festivalRepo->findAll();
+        $availableFestivals = array_filter($allFestivals, fn($festival) => !in_array($festival->getId(), $linkedFestivalIds));
+
         return $this->render('artist/edit.html.twig', [
             'form' => $form->createView(),
             'artist' => $artist,
+            'linked_festivals' => array_map(fn($fa) => $fa->getFestival(), $artist->getFestivalArtists()->toArray()),
+            'available_festivals' => $availableFestivals,
+        ]);
+    }
+
+
+    #[Route('/artists/search', name: 'artist_list', methods: ['GET'])]
+    public function list(Request $request, ArtistRepository $artistRepository, PaginatorInterface $paginator): Response
+    {
+        $searchTerm = $request->query->get('q');
+
+        $qb = $artistRepository->createQueryBuilder('a');
+
+        if ($searchTerm) {
+            $qb->andWhere(
+                $qb->expr()->orX(
+                    $qb->expr()->like('LOWER(a.name)', ':search'),
+                    $qb->expr()->like('LOWER(a.musical_genre)', ':search')
+                )
+            )
+                ->setParameter('search', '%' . strtolower($searchTerm) . '%');
+        }
+
+        $qb->orderBy('a.name', 'ASC');
+
+        $pagination = $paginator->paginate(
+            $qb->getQuery(),
+            $request->query->getInt('page', 1),
+            12
+        );
+
+        return $this->render('artist/index.html.twig', [
+            'artists' => $pagination
         ]);
     }
 }

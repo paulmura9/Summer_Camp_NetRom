@@ -102,13 +102,13 @@
     <div class="festival-card text-center">
         <h2>{{ festival.name }}</h2>
 
-{#        {% for label, messages in app.flashes %}#}
-{#            {% for message in messages %}#}
-{#                <div class="alert alert-{{ label }}">#}
-{#                    {{ message }}#}
-{#                </div>#}
-{#            {% endfor %}#}
-{#        {% endfor %}#}
+        {% for label, messages in app.flashes %}
+           {% for message in messages %}
+                <div class="alert alert-{{ label }}">
+                 {{ message }}
+               </div>
+            {% endfor %}
+        {% endfor %}
 
         <ul class="list-group text-start">
             <li class="list-group-item"><strong>Location:</strong> {{ festival.location }}</li>

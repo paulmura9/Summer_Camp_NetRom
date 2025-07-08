@@ -10,11 +10,6 @@
             font-family: 'Segoe UI', sans-serif;
         }
 
-        h2 {
-            color: #4a0072;
-            font-weight: bold;
-        }
-
         .form-card {
             background-color: #cec4ec;
             padding: 2rem;
@@ -30,10 +25,9 @@
             padding: 0.4rem 0.75rem;
             border-radius: 0.75rem;
             margin: 0.25rem;
-            display: inline-block;
+            display: inline-flex;
+            align-items: center;
             font-weight: 500;
-            text-decoration: none;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
 
         .badge-artist button {
@@ -45,23 +39,47 @@
             cursor: pointer;
         }
 
-        .badge-artist:hover {
-            transform: scale(1.05);
-            box-shadow: 0 0 10px rgba(0,0,0,0.2);
-        }
-
-        .add-artist-select {
-            max-width: 300px;
-            margin-top: 1rem;
-        }
-
-        .btn-save {
-            background-color: #218838;
-            border-color: #1e7e34;
+        .badge-add {
+            background-color: #4a0072;
             color: white;
+            border: none;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            font-size: 20px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0.25rem;
+            cursor: pointer;
         }
 
-        .btn-save:hover {
+        .badge-add span {
+            position: relative;
+            top: -2px;
+        }
+
+        .dropdown-artists {
+            display: none;
+            flex-wrap: wrap;
+            margin-top: 0.5rem;
+        }
+
+        .dropdown-artists .badge-artist {
+            background-color: #218838;
+            cursor: pointer;
+        }
+
+        .btn-success {
+            background-color: #218838;
+            border: none;
+            padding: 0.5rem 1.2rem;
+            border-radius: 0.5rem;
+            color: white;
+            font-weight: 500;
+        }
+
+        .btn-success:hover {
             background-color: #1e7e34;
         }
 
@@ -81,6 +99,11 @@
         .btn-back:hover {
             background-color: #5936a3;
             text-decoration: none;
+        }
+        .actions {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 2rem;
         }
     </style>
 {% endblock %}
@@ -105,48 +128,85 @@
             {% endif %}
         {% endfor %}
 
-        {% if linked_artists is not empty %}
-            <div class="mt-4">
-                <h5>Featured Artists</h5>
-                <div class="d-flex flex-wrap">
-                    {% for fa in linked_artists %}
-                        <span class="badge-artist">
-                            {{ fa.artist.name }}
-                            <input type="hidden" name="remove_artists[]" value="{{ fa.artist.id }}">
-                            <button type="button" onclick="this.parentElement.remove();">&times;</button>
-                        </span>
-                    {% endfor %}
-                </div>
-            </div>
-        {% endif %}
-
         <div class="mt-4">
-            <h5>Add Artist</h5>
-            <select name="add_artists[]" class="form-select add-artist-select">
-                <option value="">-- Select artist to add --</option>
-                {% for artist in available_artists %}
-                    <option value="{{ artist.id }}">{{ artist.name }}</option>
+            <h5>Featured Artists</h5>
+            <div class="d-flex flex-wrap align-items-center" id="featured-artists">
+                {% for fa in linked_artists %}
+                    <label class="badge-artist" id="artist-{{ fa.artist.id }}">
+                        {{ fa.artist.name }}
+                        <input type="hidden" name="linked_artists[]" value="{{ fa.artist.id }}">
+                        <input type="checkbox" name="remove_artists[]" value="{{ fa.artist.id }}" style="display: none;" onchange="this.closest('label').style.display = this.checked ? 'none' : 'inline-flex';">
+                        <button type="button" onclick="this.previousElementSibling.checked = true; this.previousElementSibling.dispatchEvent(new Event('change'));">&times;</button>
+                    </label>
                 {% endfor %}
-            </select>
+                <button type="button" class="badge-add" onclick="toggleDropdown()">
+                    <span>+</span>
+                </button>
+            </div>
+
+            <div class="dropdown-artists" id="dropdown-artists">
+                {% for artist in available_artists %}
+                    <button type="button" class="badge-artist" data-id="{{ artist.id }}" data-name="{{ artist.name }}" onclick="addArtist(this)">
+                        {{ artist.name }}
+                    </button>
+                {% else %}
+                    <p class="text-muted">No more available artists.</p>
+                {% endfor %}
+            </div>
         </div>
 
-        <div class="d-flex justify-content-between mt-4">
-            <button type="submit" class="btn btn-save">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-floppy" viewBox="0 0 16 16">
-                    <path d="M11 2H9v3h2z"/>
-                    <path d="M1.5 0h11.586a1.5 1.5 0 0 1 1.06.44l1.415 1.414A1.5 1.5 0 0 1 16 2.914V14.5a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 0 14.5v-13A1.5 1.5 0 0 1 1.5 0M1 1.5v13a.5.5 0 0 0 .5.5H2v-4.5A1.5 1.5 0 0 1 3.5 9h9a1.5 1.5 0 0 1 1.5 1.5V15h.5a.5.5 0 0 0 .5-.5V2.914a.5.5 0 0 0-.146-.353l-1.415-1.415A.5.5 0 0 0 13.086 1H13v4.5A1.5 1.5 0 0 1 11.5 7h-7A1.5 1.5 0 0 1 3 5.5V1H1.5a.5.5 0 0 0-.5.5m3 4a.5.5 0 0 0 .5.5h7a.5.5 0 0 0 .5-.5V1H4zM3 15h10v-4.5a.5.5 0 0 0-.5-.5h-9a.5.5 0 0 0-.5.5z"/>
-                </svg>
-                Apply changes
-            </button>
-
-            <a href="{{ path('festival_view', { id: festival.id }) }}" class="btn btn-back">
+        <div class="actions">
+            <a href="{{ path('festival_view', { id: festival.id }) }}" class="btn-back">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-return-left" viewBox="0 0 16 16">
                     <path fill-rule="evenodd" d="M14.5 1.5a.5.5 0 0 1 .5.5v4.8a2.5 2.5 0 0 1-2.5 2.5H2.707l3.347 3.346a.5.5 0 0 1-.708.708l-4.2-4.2a.5.5 0 0 1 0-.708l4-4a.5.5 0 1 1 .708.708L2.707 8.3H12.5A1.5 1.5 0 0 0 14 6.8V2a.5.5 0 0 1 .5-.5"/>
                 </svg>
                 Back
             </a>
+
+            <button type="submit" class="btn btn-success">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-bookmark-check-fill" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M2 15.5V2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v13.5a.5.5 0 0 1-.74.439L8 13.069l-5.26 2.87A.5.5 0 0 1 2 15.5m8.854-9.646a.5.5 0 0 0-.708-.708L7.5 7.793 6.354 6.646a.5.5 0 1 0-.708.708l1.5 1.5a.5.5 0 0 0 .708 0z"/>
+                </svg>
+                Apply changes
+            </button>
         </div>
 
         {{ form_end(form) }}
     </div>
+{% endblock %}
+
+{% block javascripts %}
+    <script>
+        function toggleDropdown() {
+            const dropdown = document.getElementById('dropdown-artists');
+            dropdown.style.display = dropdown.style.display === 'flex' ? 'none' : 'flex';
+        }
+
+        function addArtist(button) {
+            const id = button.getAttribute('data-id');
+            const name = button.getAttribute('data-name');
+
+            if (document.getElementById('artist-' + id)) return;
+
+            const label = document.createElement('label');
+            label.className = 'badge-artist';
+            label.id = 'artist-' + id;
+            label.innerHTML = `
+            ${name}
+            <input type="hidden" name="linked_artists[]" value="${id}">
+            <input type="checkbox" name="remove_artists[]" value="${id}" style="display:none" onchange="this.closest('label').style.display = this.checked ? 'none' : 'inline-flex';">
+            <button type="button" onclick="this.previousElementSibling.checked = true; this.previousElementSibling.dispatchEvent(new Event('change'));">&times;</button>
+        `;
+
+            const container = document.getElementById('featured-artists');
+            const addBtn = container.querySelector('.badge-add');
+            container.insertBefore(label, addBtn);
+
+            button.remove();
+
+            if (document.querySelectorAll('#dropdown-artists .badge-artist').length === 0) {
+                document.getElementById('dropdown-artists').style.display = 'none';
+            }
+        }
+    </script>
 {% endblock %}

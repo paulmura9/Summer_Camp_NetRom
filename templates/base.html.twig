@@ -22,6 +22,15 @@
 
 
         {% block stylesheets %}
+            <style>
+                html, body {
+                    background-image: url('{{ asset('images/bg-pattern.png') }}');
+                    background-size: cover;
+                    background-repeat: repeat;
+                    background-attachment: fixed;
+                    background-color: transparent !important;
+                }
+            </style>
         {% endblock %}
 
         {% block javascripts %}

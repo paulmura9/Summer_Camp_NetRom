@@ -46,7 +46,7 @@ class FestivalForm extends AbstractType
                 'html5' => true,
                 'attr' => [
                     'min' => 0,
-                    'step' => '1',
+                    'step' => '50',
                     'placeholder' => 'Enter ticket price'],
                 'constraints' => [
                     new Assert\PositiveOrZero(['message' => 'Negative price']),

@@ -6,3 +6,6 @@ services:
     App\Security\LoginSuccessHandler:
         arguments:
             $router: '@router'
+
+parameters:
+    artist_images_directory: '%kernel.project_dir%/public/uploads/artists'

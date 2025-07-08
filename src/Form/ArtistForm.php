@@ -4,10 +4,12 @@ namespace App\Form;
 
 use App\Entity\Artist;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Constraints\File;
 
 class ArtistForm extends AbstractType
 {
@@ -25,7 +27,19 @@ class ArtistForm extends AbstractType
                 'constraints' => [
                     new Assert\NotBlank(['message' => 'Musical genre cannot be empty']),
                 ],
-            ]);
+            ])
+            ->add('image', FileType::class, [
+            'label' => 'Artist Image',
+            'mapped' => false,
+            'required' => false,
+            'constraints' => [
+                new File([
+                    'maxSize' => '5M',
+                    'mimeTypes' => ['image/*'],
+                    'mimeTypesMessage' => 'Please upload a valid image file',
+                ]),
+            ],
+        ]);
     }
 
     public function configureOptions(OptionsResolver $resolver): void

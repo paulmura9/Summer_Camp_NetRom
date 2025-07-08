@@ -21,6 +21,8 @@ class Artist
     #[ORM\Column(length: 255)]
     private ?string $musical_genre = null;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $image = null;
     /**
      * @var Collection<int, FestivalArtist>
      */
@@ -87,6 +89,17 @@ class Artist
             }
         }
 
+        return $this;
+    }
+
+    public function getImage(): ?string
+    {
+        return $this->image;
+    }
+
+    public function setImage(?string $image): static
+    {
+        $this->image = $image;
         return $this;
     }
 
