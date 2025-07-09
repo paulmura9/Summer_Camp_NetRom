@@ -8,6 +8,7 @@ use App\Repository\ArtistRepository;
 use App\Repository\FestivalArtistRepository;
 use App\Repository\FestivalRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\Request;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -15,6 +16,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use App\Form\FestivalForm;
+use Symfony\Component\String\Slugger\SluggerInterface;
 
 final class FestivalController extends AbstractController
 {
@@ -99,8 +101,13 @@ final class FestivalController extends AbstractController
         ]);
     }
     #[Route('/festival/edit/{id}', name: 'festival_edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, Festival $festival, EntityManagerInterface $em, ArtistRepository $artistRepo): Response
-    {
+    public function edit(
+        Request $request,
+        Festival $festival,
+        EntityManagerInterface $em,
+        ArtistRepository $artistRepo,
+        SluggerInterface $slugger
+    ): Response {
         $linkedArtistIds = $festival->getFestivalArtists()
             ->map(fn($fa) => $fa->getArtist()?->getId())
             ->filter(fn($id) => $id !== null)
@@ -112,6 +119,24 @@ final class FestivalController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $imageFile = $form->get('image')->getData();
+
+            if ($imageFile) {
+                $originalFilename = pathinfo($imageFile->getClientOriginalName(), PATHINFO_FILENAME);
+                $safeFilename = $slugger->slug($originalFilename);
+                $newFilename = $safeFilename . '-' . uniqid() . '.' . $imageFile->guessExtension();
+
+                try {
+                    $imageFile->move(
+                        $this->getParameter('festival_images_directory'),
+                        $newFilename
+                    );
+                    $festival->setImage($newFilename);
+                } catch (FileException $e) {
+                    $this->addFlash('danger', 'Failed to upload image: ' . $e->getMessage());
+                }
+            }
+
             $artistIdsToRemove = $request->request->all('remove_artists') ?? [];
             $artistIdsToAdd = $request->request->all('linked_artists') ?? [];
 

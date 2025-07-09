@@ -23,7 +23,6 @@
             overflow: hidden;
         }
 
-        /* Overlay negru semi-transparent */
         .artist-card::before {
             content: '';
             position: absolute;
@@ -49,6 +48,7 @@
             border-radius: 0.5rem;
             margin-bottom: 0.5rem;
             color: white;
+            font-weight: 600;
         }
 
         .list-group-item strong {
@@ -103,7 +103,16 @@
 {% block body %}
     {% set bgImage = artist.image ? asset('uploads/artists/' ~ artist.image) : asset('images/default.jpg') %}
     <div class="artist-card text-center" style="--bg-image: url('{{ bgImage }}')">
-        <h2>{{ artist.name }}</h2>
+        <h2>
+            {{ artist.name }}
+            {% if artist.spotifyProfile %}
+                <a href="{{ artist.spotifyProfile }}" target="_blank" rel="noopener" title="Listen on Spotify" style="margin-left: 10px;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="white" class="bi bi-spotify" viewBox="0 0 16 16">
+                        <path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0m3.669 11.538a.5.5 0 0 1-.686.165c-1.879-1.147-4.243-1.407-7.028-.77a.499.499 0 0 1-.222-.973c3.048-.696 5.662-.397 7.77.892a.5.5 0 0 1 .166.686m.979-2.178a.624.624 0 0 1-.858.205c-2.15-1.321-5.428-1.704-7.972-.932a.625.625 0 0 1-.362-1.194c2.905-.881 6.517-.454 8.986 1.063a.624.624 0 0 1 .206.858m.084-2.268C10.154 5.56 5.9 5.419 3.438 6.166a.748.748 0 1 1-.434-1.432c2.825-.857 7.523-.692 10.492 1.07a.747.747 0 1 1-.764 1.288"/>
+                    </svg>
+                </a>
+            {% endif %}
+        </h2>
 
         {% for label, messages in app.flashes %}
             {% for message in messages %}
@@ -116,6 +125,10 @@
         <ul class="list-group text-start">
             <li class="list-group-item"><strong>Name:</strong> {{ artist.name }}</li>
             <li class="list-group-item"><strong>Musical Genre:</strong> {{ artist.musicalGenre }}</li>
+
+            {% if artist.biography  %}
+                <li class="list-group-item"><strong>Biography:</strong> {{ artist.biography }}</li>
+            {% endif %}
         </ul>
 
         <h4 class="mt-4 text-white">Performs at</h4>

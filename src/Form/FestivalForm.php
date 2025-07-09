@@ -13,6 +13,9 @@ use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Form\Extension\Core\Type\FileType;
+use Symfony\Component\Form\Extension\Core\Type\TextareaType;
+use Symfony\Component\Form\Extension\Core\Type\UrlType;
 
 class FestivalForm extends AbstractType
 {
@@ -50,6 +53,29 @@ class FestivalForm extends AbstractType
                     'placeholder' => 'Enter ticket price'],
                 'constraints' => [
                     new Assert\PositiveOrZero(['message' => 'Negative price']),
+                ],
+            ])
+            ->add('description', TextareaType::class, [
+                'required' => false,
+                'attr' => [
+                    'placeholder' => 'Enter festival description',
+                    'rows' => 4
+                ],
+            ])
+
+            ->add('website', UrlType::class, [
+                'required' => false,
+                'attr' => [
+                    'placeholder' => 'https://example.com'
+                ],
+            ])
+
+            ->add('image', FileType::class, [
+                'label' => 'Festival image (JPG/PNG)',
+                'mapped' => false,
+                'required' => false,
+                'attr' => [
+                    'accept' => 'image/*'
                 ],
             ]);
 

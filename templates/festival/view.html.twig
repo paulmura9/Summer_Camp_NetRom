@@ -11,29 +11,48 @@
         }
 
         .festival-card {
-            background-color: #cec4ec;
+            position: relative;
+            background-image: var(--bg-image);
+            background-size: cover;
+            background-position: center;
             padding: 2rem;
             border-radius: 1rem;
             box-shadow: 0 0 20px rgba(0,0,0,0.1);
             max-width: 700px;
             margin: 4rem auto;
+            overflow: hidden;
+        }
+
+        .festival-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 0;
+        }
+
+        .festival-card > * {
+            position: relative;
+            z-index: 1;
         }
 
         .festival-card h2 {
-            color: #4a0072;
+            color: white;
             font-weight: bold;
             margin-bottom: 1.5rem;
         }
 
         .list-group-item {
-            background-color: #e5d8f8;
+            background-color: rgba(255,255,255,0.3);
             border: 1px solid #d0c1e7;
             border-radius: 0.5rem;
             margin-bottom: 0.5rem;
+            color: white;
+            font-weight: 600;
         }
 
         .list-group-item strong {
-            color: #4a0072;
+            color: #ffc107;
         }
 
         .btn-back {
@@ -99,14 +118,25 @@
 {% endblock %}
 
 {% block body %}
-    <div class="festival-card text-center">
-        <h2>{{ festival.name }}</h2>
+    {% set bgImage = festival.image ? asset('uploads/festivals/' ~ festival.image) : asset('images/default.jpg') %}
+    <div class="festival-card text-center" style="--bg-image: url('{{ bgImage }}')">
+        <h2 class="d-inline-flex align-items-center justify-content-center gap-2">
+            {{ festival.name }}
+            {% if festival.website %}
+                <a href="{{ festival.website }}" target="_blank" rel="noopener noreferrer" class="text-white link-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-link-45deg" viewBox="0 0 16 16">
+                        <path d="M4.715 6.542 3.343 7.914a3 3 0 1 0 4.243 4.243l1.828-1.829A3 3 0 0 0 8.586 5.5L8 6.086a1 1 0 0 0-.154.199 2 2 0 0 1 .861 3.337L6.88 11.45a2 2 0 1 1-2.83-2.83l.793-.792a4 4 0 0 1-.128-1.287z"/>
+                        <path d="M6.586 4.672A3 3 0 0 0 7.414 9.5l.775-.776a2 2 0 0 1-.896-3.346L9.12 3.55a2 2 0 1 1 2.83 2.83l-.793.792c.112.42.155.855.128 1.287l1.372-1.372a3 3 0 1 0-4.243-4.243z"/>
+                    </svg>
+                </a>
+            {% endif %}
+        </h2>
 
         {% for label, messages in app.flashes %}
-           {% for message in messages %}
+            {% for message in messages %}
                 <div class="alert alert-{{ label }}">
-                 {{ message }}
-               </div>
+                    {{ message }}
+                </div>
             {% endfor %}
         {% endfor %}
 
@@ -115,9 +145,14 @@
             <li class="list-group-item"><strong>Start Date:</strong> {{ festival.startDate|date('Y-m-d') }}</li>
             <li class="list-group-item"><strong>End Date:</strong> {{ festival.endDate|date('Y-m-d') }}</li>
             <li class="list-group-item"><strong>Price:</strong> {{ festival.price }} RON</li>
+
+            {% if festival.description %}
+                <li class="list-group-item"><strong>Description:</strong> {{ festival.description }}</li>
+            {% endif %}
+
         </ul>
 
-        <h4 class="mt-4">Featured Artists</h4>
+        <h4 class="mt-4 text-white">Featured Artists</h4>
         {% if festival.festivalArtists|length > 0 %}
             <div class="d-flex flex-wrap justify-content-center mt-2">
                 {% for fa in festival.festivalArtists %}
@@ -129,7 +164,7 @@
                 {% endfor %}
             </div>
         {% else %}
-            <p class="text-muted">No featured artists yet</p>
+            <p class="text-light">No featured artists yet</p>
         {% endif %}
 
         {% if is_granted('ROLE_USER') %}
@@ -147,7 +182,6 @@
 
         {% if is_granted('ROLE_ADMIN') %}
             <div class="admin-buttons mt-3 d-flex justify-content-center gap-3">
-
                 <a href="{{ path('festival_edit', { id: festival.id }) }}" class="btn btn-primary d-inline-flex align-items-center gap-2" style="background-color: #0c4897;">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pen" viewBox="0 0 16 16">
                         <path d="m13.498.795.149-.149a1.207 1.207 0 1 1 1.707 1.708l-.149.148a1.5 1.5 0 0 1-.059 2.059L4.854 14.854a.5.5 0 0 1-.233.131l-4 1a.5.5 0 0 1-.606-.606l1-4a.5.5 0 0 1 .131-.232l9.642-9.642a.5.5 0 0 0-.642.056L6.854 4.854a.5.5 0 1 1-.708-.708L9.44.854A1.5 1.5 0 0 1 11.5.796a1.5 1.5 0 0 1 1.998-.001m-.644.766a.5.5 0 0 0-.707 0L1.95 11.756l-.764 3.057 3.057-.764L14.44 3.854a.5.5 0 0 0 0-.708z"/>
@@ -173,7 +207,5 @@
             </svg>
             Back to list
         </a>
-
-
     </div>
 {% endblock %}

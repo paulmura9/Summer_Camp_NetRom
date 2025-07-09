@@ -70,7 +70,7 @@
         }
 
         .artist-card .genre {
-            font-size: 0.9rem;
+            font-size: 1rem;
             color: #ffc107;
             margin-bottom: 0.75rem;
             text-decoration: none;
@@ -194,7 +194,7 @@
                 {% set bg = artist.image ? asset('uploads/artists/' ~ artist.image) : null %}
                 <a href="{{ path('artist_view', {id: artist.id}) }}" class="artist-card" style="{% if bg %}background-image: url('{{ bg }}'){% endif %}; text-decoration: none;">
                     <h5>{{ artist.name }}</h5>
-                    <div class="genre">{{ artist.musicalGenre }}</div>
+                   <strong class="genre">{{ artist.musicalGenre }}</strong>
                 </a>
             {% else %}
                 <p>No artists available.</p>

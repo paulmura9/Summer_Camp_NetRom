@@ -28,6 +28,15 @@ class Festival
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     private ?\DateTime $end_date = null;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $image = null;
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $description = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $website = null;
+
     #[ORM\Column]
     private ?int $price = null;
 
@@ -42,6 +51,7 @@ class Festival
      */
     #[ORM\OneToMany(targetEntity: Purchase::class, mappedBy: 'festival')]
     private Collection $purchases;
+
 
     public function __construct()
     {
@@ -170,6 +180,39 @@ class Festival
             }
         }
 
+        return $this;
+    }
+
+    public function getImage(): ?string
+    {
+        return $this->image;
+    }
+
+    public function setImage(?string $image): static
+    {
+        $this->image = $image;
+        return $this;
+    }
+
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
+
+    public function setDescription(?string $description): static
+    {
+        $this->description = $description;
+        return $this;
+    }
+
+    public function getWebsite(): ?string
+    {
+        return $this->website;
+    }
+
+    public function setWebsite(?string $website): static
+    {
+        $this->website = $website;
         return $this;
     }
 }

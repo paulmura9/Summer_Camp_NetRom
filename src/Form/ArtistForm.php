@@ -5,6 +5,7 @@ namespace App\Form;
 use App\Entity\Artist;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
+use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -39,7 +40,15 @@ class ArtistForm extends AbstractType
                     'mimeTypesMessage' => 'Please upload a valid image file',
                 ]),
             ],
-        ]);
+        ])
+            ->add('biography', TextareaType::class, [
+            'attr' => ['placeholder' => 'Write a short biography...', 'rows' => 5],
+            'required' => false,
+        ])
+            ->add('spotifyProfile', TextType::class, [
+                'attr' => ['placeholder' => 'Spotify artist profile'],
+                'required' => false,
+            ]);
     }
 
     public function configureOptions(OptionsResolver $resolver): void

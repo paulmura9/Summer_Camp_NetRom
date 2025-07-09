@@ -103,4 +103,32 @@ class Artist
         return $this;
     }
 
+    #[ORM\Column(type: 'text', nullable: true)]
+    private ?string $biography = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $spotifyProfile = null;
+
+    public function getBiography(): ?string
+    {
+        return $this->biography;
+    }
+
+    public function setBiography(?string $biography): static
+    {
+        $this->biography = $biography;
+        return $this;
+    }
+
+    public function getSpotifyProfile(): ?string
+    {
+        return $this->spotifyProfile;
+    }
+
+    public function setSpotifyProfile(?string $spotifyProfile): static
+    {
+        $this->spotifyProfile = $spotifyProfile;
+        return $this;
+    }
+
 }

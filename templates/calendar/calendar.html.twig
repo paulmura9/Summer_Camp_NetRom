@@ -1,0 +1,144 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Festival Calendar{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        html, body {
+            background-color: #f2e9ff;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        .calendar-container {
+            max-width: 1000px;
+            margin: 3rem auto;
+            background-color: #cec4ec;
+            border-radius: 1rem;
+            padding: 2rem;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .calendar-header h2 {
+            color: #4a0072;
+            font-weight: bold;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 1rem;
+        }
+
+        .day-name {
+            text-align: center;
+            font-weight: bold;
+            color: #4a0072;
+        }
+
+        .day-cell {
+            background-color: #f9f6ff;
+            min-height: 100px;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 0 6px rgba(0,0,0,0.05);
+            position: relative;
+        }
+
+        .day-number {
+            font-weight: bold;
+            color: #4a0072;
+        }
+
+        .festival-link {
+            display: block;
+            font-size: 0.9rem;
+            color: #8225bc;
+            font-weight: 500;
+            margin-top: 0.3rem;
+            text-decoration: none;
+        }
+
+        .festival-link:hover {
+            text-decoration: underline;
+        }
+
+        .nav-arrow {
+            font-size: 1.5rem;
+            color: #4a0072;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .empty {
+            background-color: transparent;
+            box-shadow: none;
+        }
+        .btn-back {
+            background-color: #6f42c1;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .btn-back:hover {
+            background-color: #5936a3;
+            text-decoration: none;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <div class="calendar-container">
+        <div class="calendar-header">
+            <a class="nav-arrow" href="{{ path('calendar', { month: prevMonth.format('m'), year: prevMonth.format('Y') }) }}">&larr;</a>
+            <h2>{{ currentMonth.format('F Y') }}</h2>
+            <a class="nav-arrow" href="{{ path('calendar', { month: nextMonth.format('m'), year: nextMonth.format('Y') }) }}">&rarr;</a>
+        </div>
+
+        <div class="calendar-grid">
+            {% for dayName in ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] %}
+                <div class="day-name">{{ dayName }}</div>
+            {% endfor %}
+
+            {% for i in 1..firstDayOfWeek - 1 %}
+                <div class="day-cell empty"></div>
+            {% endfor %}
+
+            {% for day in 1..daysInMonth %}
+                <div class="day-cell">
+                    <div class="day-number">{{ day }}</div>
+                    {% if festivalsByDay[day] is defined %}
+                        {% for festival in festivalsByDay[day] %}
+                            <a href="{{ path('festival_view', { id: festival.id }) }}" class="festival-link">
+                                {{ festival.name }}
+                            </a>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+    <div class="text-center mt-4">
+    <a href="{{ path('showtime') }}" class="btn btn-back">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-arrow-return-left" viewBox="0 0 16 16">
+            <path fill-rule="evenodd" d="M14.5 1.5a.5.5 0 0 1 .5.5v4.8a2.5 2.5 0 0 1-2.5 2.5H2.707l3.347 3.346a.5.5 0 0 1-.708.708l-4.2-4.2a.5.5 0 0 1 0-.708l4-4a.5.5 0 1 1 .708.708L2.707 8.3H12.5A1.5 1.5 0 0 0 14 6.8V2a.5.5 0 0 1 .5-.5"/>
+        </svg>
+        Back
+    </a>
+</div>
+
+{% endblock %}
