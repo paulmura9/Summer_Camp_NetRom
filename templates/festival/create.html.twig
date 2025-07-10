@@ -91,6 +91,19 @@
         <h2>Add New Festival</h2>
 
         {{ form_start(form) }}
+        {{ form_errors(form) }}
+        {% for error in form.vars.errors %}
+            <div class="alert alert-danger">{{ error.message }}</div>
+        {% endfor %}
+
+        {% for label, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="alert alert-{{ label }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endfor %}
+
 
         {% for field in form %}
             {% if field.vars.name != 'artist' %}

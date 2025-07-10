@@ -238,7 +238,7 @@
                 ${name}
                 <input type="hidden" name="linked_festivals[]" value="${id}">
                 <input type="checkbox" name="remove_festivals[]" value="${id}" style="display:none" onchange="this.closest('label').style.display = this.checked ? 'none' : 'inline-flex';">
-                <button type="button" onclick="this.previousElementSibling.checked = true; this.previousElementSibling.dispatchEvent(new Event('change'))">&times;</button>
+                <button type="button" onclick="removeFestival(this)">&times;</button>
             `;
 
             const container = document.getElementById('linked-festivals');
@@ -257,6 +257,28 @@
             if (input) {
                 input.value = '';
             }
+        }
+
+        function removeFestival(button) {
+            const label = button.closest('label');
+            const checkbox = label.querySelector('input[type="checkbox"]');
+            checkbox.checked = true;
+            checkbox.dispatchEvent(new Event('change'));
+
+            const id = label.id.split('-')[1];
+            const name = label.textContent.trim().slice(0, -1);
+            label.remove();
+
+            const dropdown = document.getElementById('dropdown-festivals');
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'badge-festival';
+            btn.setAttribute('data-id', id);
+            btn.setAttribute('data-name', name);
+            btn.setAttribute('onclick', 'addFestival(this)');
+            btn.textContent = name;
+            dropdown.appendChild(btn);
+            dropdown.style.display = 'flex';
         }
     </script>
 {% endblock %}

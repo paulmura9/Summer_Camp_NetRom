@@ -16,6 +16,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\UrlType;
+use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 
 class FestivalForm extends AbstractType
 {
@@ -76,6 +77,14 @@ class FestivalForm extends AbstractType
                 'required' => false,
                 'attr' => [
                     'accept' => 'image/*'
+                ],
+            ])
+            ->add('capacity', IntegerType::class, [
+                'label' => 'Total Tickets',
+                'required' => true,
+                'attr' => [
+                    'min' => 0,
+                    'step' => 1, //50
                 ],
             ]);
 

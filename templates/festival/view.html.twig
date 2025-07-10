@@ -114,6 +114,71 @@
         .alert {
             margin-top: 1rem;
         }
+
+        .badge-add {
+            background-color: #7a24a6;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            font-size: 20px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0.25rem;
+            cursor: pointer;
+        }
+
+        .badge-add span {
+            position: relative;
+            top: -2px;
+        }
+
+        .badge-quantity {
+            background-color: #7a24a6;
+            color: white;
+            border: none;
+            border-radius: 60%;
+            width: auto;
+            height: 32px;
+            font-size: 13px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 0.5rem;
+            padding: 0 8px;
+            cursor: pointer;
+            margin-left: 10px;
+            transform: translateY(9px);
+        }
+
+        #dropdownMenu {
+            display: none;
+            position: absolute;
+            background: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 0 10px rgba(0,0,0,0.2);
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 99999;
+            padding: 0.25rem 0;
+            font-weight: 600;
+            width: auto;
+            min-width: 40px;
+        }
+
+        .dropdown-item {
+            padding: 0.35rem 0.75rem;
+            font-size: 0.95rem;
+            color: #4a0072;
+            white-space: nowrap;
+        }
+
+        .dropdown-item:hover {
+            background-color: #f0e6fc;
+            cursor: pointer;
+        }
     </style>
 {% endblock %}
 
@@ -132,19 +197,22 @@
             {% endif %}
         </h2>
 
-        {% for label, messages in app.flashes %}
-            {% for message in messages %}
-                <div class="alert alert-{{ label }}">
-                    {{ message }}
-                </div>
-            {% endfor %}
-        {% endfor %}
+{#        {% for label, messages in app.flashes %}#}
+{#            {% for message in messages %}#}
+{#                <div class="alert alert-{{ label }}">#}
+{#                    {{ message }}#}
+{#                </div>#}
+{#            {% endfor %}#}
+{#        {% endfor %}#}
 
         <ul class="list-group text-start">
             <li class="list-group-item"><strong>Location:</strong> {{ festival.location }}</li>
             <li class="list-group-item"><strong>Start Date:</strong> {{ festival.startDate|date('Y-m-d') }}</li>
             <li class="list-group-item"><strong>End Date:</strong> {{ festival.endDate|date('Y-m-d') }}</li>
-            <li class="list-group-item"><strong>Price:</strong> {{ festival.price }} RON</li>
+            <li class="list-group-item"><strong>Price / ticket:</strong> {{ festival.price }} RON</li>
+            {% if festival.capacity > 0 %}
+                <li class="list-group-item"><strong>Tickets Available:</strong> {{ festival.capacity }}</li>
+            {% endif %}
 
             {% if festival.description %}
                 <li class="list-group-item"><strong>Description:</strong> {{ festival.description }}</li>
@@ -152,33 +220,76 @@
 
         </ul>
 
+        {% if is_granted('ROLE_USER') and hasTicket %}
+            <p class="mt-3 fw-bold" style="font-size: 1.1rem; color: orange; font-family: 'Courier New', monospace;">
+                You already have a ticket for this festival!
+            </p>
+        {% endif %}
+
         <h4 class="mt-4 text-white">Featured Artists</h4>
         {% if festival.festivalArtists|length > 0 %}
-            <div class="d-flex flex-wrap justify-content-center mt-2">
+            <div class="d-flex flex-wrap justify-content-center mt-2" id="artist-container">
                 {% for fa in festival.festivalArtists %}
                     {% if fa.artist %}
-                        <a href="{{ path('artist_view', { id: fa.artist.id }) }}" class="badge-artist">
+                        <a href="{{ path('artist_view', { id: fa.artist.id }) }}"
+                           class="badge-artist {{ loop.index > 10 ? 'extra-artist d-none' : '' }}">
                             {{ fa.artist.name }}
                         </a>
                     {% endif %}
                 {% endfor %}
+                {% if festival.festivalArtists|length > 10 %}
+                    <button id="show-more-btn" type="button" class="badge-add" onclick="showAllArtists()" title="Show all artists">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-three-dots" viewBox="0 0 16 16">
+                            <path d="M3 9.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3m5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3m5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3"/>
+                        </svg>
+                    </button>
+
+                    <button id="hide-more-btn" type="button" class="badge-add d-none" onclick="hideExtraArtists()" title="Hide extra artists">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-dash-lg" viewBox="0 0 16 16">
+                            <path fill-rule="evenodd" d="M2 8a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11A.5.5 0 0 1 2 8z"/>
+                        </svg>
+                    </button>
+                {% endif %}
             </div>
         {% else %}
             <p class="text-light">No featured artists yet</p>
         {% endif %}
 
         {% if is_granted('ROLE_USER') %}
-            <form method="post" action="{{ path('purchase_create', { id: festival.id }) }}">
-                <button type="submit" class="btn btn-buy">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
-                         class="bi bi-ticket-perforated" viewBox="0 0 16 16">
-                        <path d="M4 4.85v.9h1v-.9zm7 0v.9h1v-.9zm-7 1.8v.9h1v-.9zm7 0v.9h1v-.9zm-7 1.8v.9h1v-.9zm7 0v.9h1v-.9zm-7 1.8v.9h1v-.9zm7 0v.9h1v-.9z"/>
-                        <path d="M1.5 3A1.5 1.5 0 0 0 0 4.5V6a.5.5 0 0 0 .5.5 1.5 1.5 0 1 1 0 3 .5.5 0 0 0-.5.5v1.5A1.5 1.5 0 0 0 1.5 13h13a1.5 1.5 0 0 0 1.5-1.5V10a.5.5 0 0 0-.5-.5 1.5 1.5 0 0 1 0-3A.5.5 0 0 0 16 6V4.5A1.5 1.5 0 0 0 14.5 3zM1 4.5a.5.5 0 0 1 .5-.5h13a.5.5 0 0 1 .5.5v1.05a2.5 2.5 0 0 0 0 4.9v1.05a.5.5 0 0 1-.5.5h-13a.5.5 0 0 1-.5-.5v-1.05a2.5 2.5 0 0 0 0-4.9z"/>
-                    </svg>
-                    Buy Ticket
-                </button>
-            </form>
+            {% if festival.capacity == 0 %}
+                <p class="mt-3 text-danger fw-bold" style="font-size: 1.1rem;">Sold out at the moment!</p>
+            {% elseif festival.startDate <= "now"|date('Y-m-d') %}
+                <p class="mt-3 text-warning fw-bold" style="font-size: 1.1rem;">This event has already started!</p>
+            {% else %}
+                <form method="post" action="{{ path('purchase_create', { id: festival.id }) }}" onsubmit="return confirmPurchase()">
+                    <input type="hidden" name="quantity" id="quantityInput" value="1">
+
+                    <div style="position: relative; display: inline-block; margin-top: 1rem;">
+                        <button type="submit" class="btn btn-buy">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                                 class="bi bi-ticket-perforated" viewBox="0 0 16 16">
+                                <path d="M4 4.85v.9h1v-.9zm7 0v.9h1v-.9zm-7 1.8v.9h1v-.9zm7 0v.9h1v-.9zm-7 1.8v.9h1v-.9zm7 0v.9h1v-.9zm-7 1.8v.9h1v-.9zm7 0v.9h1v-.9z"/>
+                                <path d="M1.5 3A1.5 1.5 0 0 0 0 4.5V6a.5.5 0 0 0 .5.5 1.5 1.5 0 1 1 0 3 .5.5 0 0 0-.5.5v1.5A1.5 1.5 0 0 0 1.5 13h13a1.5 1.5 0 0 0 1.5-1.5V10a.5.5 0 0 0-.5-.5 1.5 1.5 0 0 1 0-3A.5.5 0 0 0 16 6V4.5A1.5 1.5 0 0 0 14.5 3zM1 4.5a.5.5 0 0 1 .5-.5h13a.5.5 0 0 1 .5.5v1.05a2.5 2.5 0 0 0 0 4.9v1.05a.5.5 0 0 1-.5.5h-13a.5.5 0 0 1-.5-.5v-1.05a2.5 2.5 0 0 0 0-4.9z"/>
+                            </svg>
+                            Buy Ticket
+                        </button>
+
+                        <button type="button" class="badge-quantity" id="quantityDropdown" onclick="toggleQuantityDropdown()" style="margin-left: 10px;">
+                            <span id="selectedQuantity">x1</span>
+                        </button>
+
+                        <div id="dropdownMenu" class="dropdown-menu"></div>
+                    </div>
+
+                    <div id="totalPriceCard"
+                         class="mt-3 px-3 py-2 rounded text-white fw-bold mx-auto"
+                         style="background-color: #003366; display: none; width: fit-content; font-size: 1rem;">
+                        Total: <span id="totalPriceText">0 RON</span>
+                    </div>
+                </form>
+            {% endif %}
         {% endif %}
+
 
         {% if is_granted('ROLE_ADMIN') %}
             <div class="admin-buttons mt-3 d-flex justify-content-center gap-3">
@@ -208,4 +319,75 @@
             Back to list
         </a>
     </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        function showAllArtists() {
+            document.querySelectorAll('.extra-artist').forEach(e => e.classList.remove('d-none'));
+            document.getElementById('show-more-btn').classList.add('d-none');
+            document.getElementById('hide-more-btn').classList.remove('d-none');
+        }
+
+        function hideExtraArtists() {
+            document.querySelectorAll('.extra-artist').forEach(e => e.classList.add('d-none'));
+            document.getElementById('hide-more-btn').classList.add('d-none');
+            document.getElementById('show-more-btn').classList.remove('d-none');
+        }
+
+        function toggleQuantityDropdown() {
+            const menu = document.getElementById('dropdownMenu');
+            const trigger = document.getElementById('quantityDropdown');
+
+            if (menu.children.length === 0) {
+                for (let i = 1; i <= 10; i++) {
+                    const item = document.createElement('div');
+                    item.className = 'dropdown-item';
+                    item.textContent = 'x' + i;
+                    item.onclick = () => selectQuantity(i);
+                    menu.appendChild(item);
+                }
+            }
+
+            menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+            menu.style.position = 'absolute';
+            menu.style.zIndex = '9999';
+            menu.style.left = trigger.offsetLeft + 'px';
+            menu.style.top = (trigger.offsetTop - menu.offsetHeight - 5) + 'px';
+        }
+
+        function selectQuantity(q) {
+            const available = {{ festival.capacity }};
+            if (q > available) {
+                alert('Not enough tickets available. Only ' + available + ' left.');
+                return;
+            }
+
+            document.getElementById('selectedQuantity').textContent = 'x' + q;
+            document.getElementById('quantityInput').value = q;
+            document.getElementById('dropdownMenu').style.display = 'none';
+
+            const price = {{ festival.price }};
+            const total = price * q;
+            const totalText = document.getElementById('totalPriceText');
+            const totalCard = document.getElementById('totalPriceCard');
+            totalText.textContent = total + ' RON';
+            totalCard.style.display = q > 1 ? 'block' : 'none';
+        }
+        function confirmPurchase() {
+            const q = document.getElementById('quantityInput').value;
+            const name = "{{ festival.name|e('js') }}";
+            return confirm(`Are you sure you want to buy ${q} ticket${q == 1 ? '' : 's'} to ${name}?`);
+        }
+
+        document.addEventListener('click', function (event) {
+            const dropdown = document.getElementById('dropdownMenu');
+            const trigger = document.getElementById('quantityDropdown');
+
+            if (!dropdown.contains(event.target) && !trigger.contains(event.target)) {
+                dropdown.style.display = 'none';
+            }
+        });
+    </script>
 {% endblock %}

@@ -52,8 +52,23 @@ final class FestivalController extends AbstractController
             throw $this->createNotFoundException('Festival not found');
         }
 
+        $hasTicket = false;
+
+        if ($this->isGranted('ROLE_USER')) {
+            $user = $this->getUser();
+            $purchaseRepo = $em->getRepository(\App\Entity\Purchase::class);
+
+            $existing = $purchaseRepo->findOneBy([
+                'user' => $user,
+                'festival' => $festival,
+            ]);
+
+            $hasTicket = $existing !== null;
+        }
+
         return $this->render('festival/view.html.twig', [
-            'festival' => $festival
+            'festival' => $festival,
+            'hasTicket' => $hasTicket,
         ]);
     }
 
@@ -88,12 +103,16 @@ final class FestivalController extends AbstractController
 
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $em->persist($festival);
-            $em->flush();
+        if ($form->isSubmitted()) {
+            if (!$form->isValid()) {
+                $this->addFlash('error', 'Please correct the errors.');
+            } else {
+                $em->persist($festival);
+                $em->flush();
 
-            $this->addFlash('success', 'Festival creat.');
-            return $this->redirectToRoute('festivals_list');
+                $this->addFlash('success', 'Festival created.');
+                return $this->redirectToRoute('festivals_list');
+            }
         }
 
         return $this->render('festival/create.html.twig', [

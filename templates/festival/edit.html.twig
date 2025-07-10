@@ -113,10 +113,10 @@
         <h2 class="text-center mb-4">Edit Festival info</h2>
 
         {{ form_start(form) }}
-
-        {% if not form.vars.valid %}
-            <div class="alert alert-danger">Please correct the errors below.</div>
-        {% endif %}
+        {{ form_errors(form) }}
+        {% for error in form.vars.errors %}
+            <div class="alert alert-danger">{{ error.message }}</div>
+        {% endfor %}
 
         {% for field in form %}
             {% if field.vars.name != 'artist' and field.vars.name != 'availableArtists' %}
@@ -195,7 +195,7 @@
             ${name}
             <input type="hidden" name="linked_artists[]" value="${id}">
             <input type="checkbox" name="remove_artists[]" value="${id}" style="display:none" onchange="this.closest('label').style.display = this.checked ? 'none' : 'inline-flex';">
-            <button type="button" onclick="this.previousElementSibling.checked = true; this.previousElementSibling.dispatchEvent(new Event('change'));">&times;</button>
+            <button type="button" onclick="removeArtist(this)">&times;</button>
         `;
 
             const container = document.getElementById('featured-artists');
@@ -207,6 +207,27 @@
             if (document.querySelectorAll('#dropdown-artists .badge-artist').length === 0) {
                 document.getElementById('dropdown-artists').style.display = 'none';
             }
+        }
+        function removeArtist(button) {
+            const label = button.closest('label');
+            const checkbox = label.querySelector('input[type="checkbox"]');
+            checkbox.checked = true;
+            checkbox.dispatchEvent(new Event('change'));
+
+            const id = label.id.split('-')[1];
+            const name = label.textContent.trim().slice(0, -1);
+            label.remove();
+
+            const dropdown = document.getElementById('dropdown-artists');
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'badge-artist';
+            btn.setAttribute('data-id', id);
+            btn.setAttribute('data-name', name);
+            btn.setAttribute('onclick', 'addArtist(this)');
+            btn.textContent = name;
+            dropdown.appendChild(btn);
+            dropdown.style.display = 'flex';
         }
     </script>
 {% endblock %}

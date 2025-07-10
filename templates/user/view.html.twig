@@ -109,7 +109,7 @@
         {% if is_granted('ROLE_ADMIN') %}
         <div class="form-group">
             <label>Role:</label>
-            <input type="text" class="form-control" value="{{ user.roles[0] }}" disabled>
+            <input type="text" class="form-control" value="{% if 'ROLE_ADMIN' in user.roles %}Admin{% elseif 'ROLE_USER' in user.roles %}User{% else %}Unknown{% endif %}" disabled>
         </div>
         {% endif %}
 

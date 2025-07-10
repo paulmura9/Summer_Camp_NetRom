@@ -7,8 +7,12 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
+use Symfony\Component\Validator\Constraints\Callback;
 
 #[ORM\Entity(repositoryClass: FestivalRepository::class)]
+#[Assert\Callback('validateDates')]
 class Festival
 {
     #[ORM\Id]
@@ -39,6 +43,11 @@ class Festival
 
     #[ORM\Column]
     private ?int $price = null;
+
+    #[ORM\Column]
+    #[Assert\PositiveOrZero(message: 'Capacity must be 0 or more')]
+    //#[Assert\DivisibleBy(value: 50, message: 'Capacity must be in steps of 50')]
+    private ?int $capacity = null;
 
     /**
      * @var Collection<int, FestivalArtist>
@@ -145,7 +154,6 @@ class Festival
     public function removeFestivalArtist(FestivalArtist $festivalArtist): static
     {
         if ($this->festivalArtists->removeElement($festivalArtist)) {
-            // set the owning side to null (unless already changed)
             if ($festivalArtist->getFestival() === $this) {
                 $festivalArtist->setFestival(null);
             }
@@ -214,5 +222,27 @@ class Festival
     {
         $this->website = $website;
         return $this;
+    }
+
+    public function getCapacity(): ?int
+    {
+        return $this->capacity;
+    }
+
+    public function setCapacity(int $capacity): static
+    {
+        $this->capacity = $capacity;
+
+        return $this;
+    }
+
+
+    public function validateDates(ExecutionContextInterface $context): void
+    {
+        if ($this->getEndDate() < $this->getStartDate()) {
+            $context->buildViolation('End date must be after start date.')
+                ->atPath('end_date')
+                ->addViolation();
+        }
     }
 }

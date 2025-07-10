@@ -8,12 +8,12 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-
-
+use App\Entity\Purchase;
+use Doctrine\ORM\EntityManagerInterface;
 class CalendarController extends AbstractController
 {
     #[Route('/calendar', name: 'calendar')]
-    public function calendar(Request $request, FestivalRepository $festivalRepo): Response
+    public function calendar(Request $request, FestivalRepository $festivalRepo, EntityManagerInterface $em): Response
     {
         $monthRaw = $request->query->get('month');
         $yearRaw = $request->query->get('year');
@@ -21,17 +21,9 @@ class CalendarController extends AbstractController
         $month = ctype_digit($monthRaw ?? '') ? (int)$monthRaw : (int)date('m');
         $year = ctype_digit($yearRaw ?? '') ? (int)$yearRaw : (int)date('Y');
 
-        if ($month < 1 || $month > 12) {
-            $month = (int)date('m');
-        }
-        if ($year < 1970 || $year > 2100) {
-            $year = (int)date('Y');
-        }
-
         $currentMonth = \DateTime::createFromFormat('Y-m-d', sprintf('%04d-%02d-01', $year, $month));
         $daysInMonth = (int)$currentMonth->format('t');
         $firstDayOfWeek = (int)$currentMonth->format('N');
-
         $prevMonth = (clone $currentMonth)->modify('-1 month');
         $nextMonth = (clone $currentMonth)->modify('+1 month');
 
@@ -44,6 +36,18 @@ class CalendarController extends AbstractController
             ->setParameter('end', $endDate)
             ->getQuery()
             ->getResult();
+
+        $userFestivalIds = [];
+
+        if ($this->getUser()) {
+            $purchases = $em->getRepository(Purchase::class)->findBy(['user' => $this->getUser()]);
+            foreach ($purchases as $purchase) {
+                $festival = $purchase->getFestival();
+                if ($festival) {
+                    $userFestivalIds[] = $festival->getId();
+                }
+            }
+        }
 
         $festivalsByDay = [];
         foreach ($festivals as $festival) {
@@ -58,6 +62,8 @@ class CalendarController extends AbstractController
             'festivalsByDay' => $festivalsByDay,
             'prevMonth' => $prevMonth,
             'nextMonth' => $nextMonth,
+            'userFestivalIds' => $userFestivalIds,
         ]);
     }
+
 }

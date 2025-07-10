@@ -45,12 +45,12 @@ class RegisterForm extends AbstractType
                     new Assert\NotBlank(),
                 ],
             ])
-            ->add('role', ChoiceType::class, [
-                'choices'  => [
-                    'Standard User' => 'ROLE_USER',
-                    'Admin' => 'ROLE_ADMIN',
-                ],
-            ])
+//            ->add('role', ChoiceType::class, [
+//                'choices'  => [
+//                    'Standard User' => 'ROLE_USER',
+//                    'Admin' => 'ROLE_ADMIN',
+//                ],
+//            ])
             ->add('details', UserDetailsForm::class);
     }
 

@@ -123,7 +123,9 @@
                     <div class="day-number">{{ day }}</div>
                     {% if festivalsByDay[day] is defined %}
                         {% for festival in festivalsByDay[day] %}
-                            <a href="{{ path('festival_view', { id: festival.id }) }}" class="festival-link">
+                            <a href="{{ path('festival_view', { id: festival.id }) }}"
+                               class="festival-link"
+                               style="color: {{ festival.id in userFestivalIds ? '#007bff' : '#8225bc' }};">
                                 {{ festival.name }}
                             </a>
                         {% endfor %}

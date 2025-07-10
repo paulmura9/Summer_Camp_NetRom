@@ -31,7 +31,7 @@ final class PurchaseController extends AbstractController
             ->leftJoin('p.festival', 'f')
             ->where('p.user = :user')
             ->setParameter('user', $user)
-            ->orderBy('p.id', 'DESC')
+            ->orderBy('f.start_date', 'ASC')
             ->getQuery();
 
         $purchases = $paginator->paginate(
@@ -50,7 +50,8 @@ final class PurchaseController extends AbstractController
         int $id,
         FestivalRepository $festivalRepository,
         Security $security,
-        EntityManagerInterface $em
+        EntityManagerInterface $em,
+        Request $request
     ): Response {
         /** @var User $user */
         $user = $security->getUser();
@@ -60,25 +61,27 @@ final class PurchaseController extends AbstractController
             throw $this->createNotFoundException('Festival or User not found.');
         }
 
-        $existing = $em->getRepository(Purchase::class)->findOneBy([
-            'user' => $user,
-            'festival' => $festival
-        ]);
+        $quantity = (int) $request->request->get('quantity', 1);
 
-        if ($existing) {
-            $this->addFlash('warning', 'You already bought a ticket for this festival.');
-        } else {
-            $purchase = new Purchase();
-            $purchase->setUser($user);
-            $purchase->setFestival($festival);
-
-            $em->persist($purchase);
-            $em->flush();
-
-            $this->addFlash('success', 'Ticket purchased successfully!');
+        if ($quantity < 1 || $quantity > $festival->getCapacity()) {
+            $this->addFlash('warning', 'Not enough tickets available.');
+            return $this->redirectToRoute('festival_view', ['id' => $festival->getId()]);
         }
 
-        return $this->redirectToRoute('festival_view', ['id' => $festival->getId()]);
+        $purchase = new Purchase();
+        $purchase->setUser($user);
+        $purchase->setFestival($festival);
+        $purchase->setQuantity($quantity);
+        $purchase->setCreatedAt(new \DateTime());
+
+        $festival->setCapacity($festival->getCapacity() - $quantity);
+
+        $em->persist($purchase);
+        $em->flush();
+
+        $this->addFlash('success', 'You bought ' . $quantity . ' ticket(s) successfully!');
+
+        return $this->redirectToRoute('purchase_list', ['id' => $festival->getId()]);
     }
 
     #[Route('/all/purchases', name: 'all_purchases_list')]
@@ -123,6 +126,34 @@ final class PurchaseController extends AbstractController
         $this->addFlash('success', 'Purchase deleted successfully.');
         return $this->redirectToRoute('all_purchases_list');
     }
+
+//    #[Route('/bookings', name: 'bookings', methods: ['GET'])]
+//    public function booking(
+//        EntityManagerInterface $em,
+//        Request $request,
+//        PaginatorInterface $paginator
+//    ): Response {
+//        $user = $this->getUser();
+//
+//        $query = $em->createQueryBuilder()
+//            ->select('p', 'f')
+//            ->from(Purchase::class, 'p')
+//            ->leftJoin('p.festival', 'f')
+//            ->where('p.user = :user')
+//            ->setParameter('user', $user)
+//            ->orderBy('p.id', 'DESC')
+//            ->getQuery();
+//
+//        $purchases = $paginator->paginate(
+//            $query,
+//            $request->query->getInt('page', 1),
+//            10
+//        );
+//
+//        return $this->render('purchase/booking.html.twig', [
+//            'purchases' => $purchases
+//        ]);
+//    }
 
 
 }
