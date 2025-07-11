@@ -46,7 +46,7 @@ class Festival
 
     #[ORM\Column]
     #[Assert\PositiveOrZero(message: 'Capacity must be 0 or more')]
-    //#[Assert\DivisibleBy(value: 50, message: 'Capacity must be in steps of 50')]
+    #[Assert\DivisibleBy(value: 50, message: 'Capacity must be in steps of 50')]
     private ?int $capacity = null;
 
     /**

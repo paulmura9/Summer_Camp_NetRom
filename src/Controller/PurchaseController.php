@@ -127,33 +127,4 @@ final class PurchaseController extends AbstractController
         return $this->redirectToRoute('all_purchases_list');
     }
 
-//    #[Route('/bookings', name: 'bookings', methods: ['GET'])]
-//    public function booking(
-//        EntityManagerInterface $em,
-//        Request $request,
-//        PaginatorInterface $paginator
-//    ): Response {
-//        $user = $this->getUser();
-//
-//        $query = $em->createQueryBuilder()
-//            ->select('p', 'f')
-//            ->from(Purchase::class, 'p')
-//            ->leftJoin('p.festival', 'f')
-//            ->where('p.user = :user')
-//            ->setParameter('user', $user)
-//            ->orderBy('p.id', 'DESC')
-//            ->getQuery();
-//
-//        $purchases = $paginator->paginate(
-//            $query,
-//            $request->query->getInt('page', 1),
-//            10
-//        );
-//
-//        return $this->render('purchase/booking.html.twig', [
-//            'purchases' => $purchases
-//        ]);
-//    }
-
-
 }

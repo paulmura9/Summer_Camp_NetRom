@@ -107,11 +107,18 @@ final class FestivalController extends AbstractController
             if (!$form->isValid()) {
                 $this->addFlash('error', 'Please correct the errors.');
             } else {
-                $em->persist($festival);
-                $em->flush();
+                $existingFestival = $em->getRepository(Festival::class)
+                    ->findOneBy(['name' => $festival->getName()]);
 
-                $this->addFlash('success', 'Festival created.');
-                return $this->redirectToRoute('festivals_list');
+                if ($existingFestival) {
+                    $this->addFlash('error', 'A festival with this name already exists.');
+                } else {
+                    $em->persist($festival);
+                    $em->flush();
+
+                    $this->addFlash('success', 'Festival created.');
+                    return $this->redirectToRoute('festivals_list');
+                }
             }
         }
 

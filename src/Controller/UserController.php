@@ -30,7 +30,7 @@ final class UserController extends AbstractController
         $users = $paginator->paginate(
             $query,
             $request->query->getInt('page', 1),
-            12
+            13
         );
 
         return $this->render('user/index.html.twig', [

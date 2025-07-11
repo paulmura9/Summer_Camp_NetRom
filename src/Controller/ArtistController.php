@@ -79,7 +79,7 @@ final class ArtistController extends AbstractController
     }
 
     #[Route('/artist/create', name: 'artist_create', methods: ['GET', 'POST'])]
-    public function create(Request $request, EntityManagerInterface $em): Response
+    public function create(Request $request, EntityManagerInterface $em, SluggerInterface $slugger): Response
     {
         $artist = new Artist();
         $form = $this->createForm(ArtistForm::class, $artist);
@@ -87,6 +87,24 @@ final class ArtistController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $imageFile = $form->get('image')->getData();
+
+            if ($imageFile) {
+                $originalFilename = pathinfo($imageFile->getClientOriginalName(), PATHINFO_FILENAME);
+                $safeFilename = $slugger->slug($originalFilename);
+                $newFilename = $safeFilename . '-' . uniqid() . '.' . $imageFile->guessExtension();
+
+                try {
+                    $imageFile->move(
+                        $this->getParameter('artist_images_directory'),
+                        $newFilename
+                    );
+                    $artist->setImage($newFilename);
+                } catch (FileException $e) {
+                    $this->addFlash('danger', 'Failed to upload image: ' . $e->getMessage());
+                }
+            }
+
             $em->persist($artist);
             $em->flush();
 

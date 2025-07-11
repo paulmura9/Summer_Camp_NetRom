@@ -84,7 +84,8 @@ class FestivalForm extends AbstractType
                 'required' => true,
                 'attr' => [
                     'min' => 0,
-                    'step' => 1, //50
+                    'step' => 50,
+                    'placeholder' => 'Enter total number of tickets',
                 ],
             ]);
 
