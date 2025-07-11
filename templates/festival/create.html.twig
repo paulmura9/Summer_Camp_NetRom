@@ -96,13 +96,13 @@
             <div class="alert alert-danger">{{ error.message }}</div>
         {% endfor %}
 
-        {% for label, messages in app.flashes %}
-            {% for message in messages %}
-                <div class="alert alert-{{ label }}">
-                    {{ message }}
-                </div>
-            {% endfor %}
-        {% endfor %}
+{#        {% for label, messages in app.flashes %}#}
+{#            {% for message in messages %}#}
+{#                <div class="alert alert-{{ label }}">#}
+{#                    {{ message }}#}
+{#                </div>#}
+{#            {% endfor %}#}
+{#        {% endfor %}#}
 
 
         {% for field in form %}

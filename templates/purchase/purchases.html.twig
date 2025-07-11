@@ -100,6 +100,37 @@
             color: #dc3545;
             font-weight: bold;
         }
+
+
+        .pagination {
+            margin-top: 2rem;
+        }
+
+        .pagination li a,
+        .pagination li span {
+            background-color: #e5d8f8;
+            color: #4a0072;
+            border: 1px solid #bfa0e0;
+            padding: 0.5rem 0.75rem;
+            margin: 0 2px;
+            border-radius: 0.4rem;
+            text-decoration: none;
+        }
+
+        .pagination li.active span,
+        .pagination li a:hover {
+            background-color: #6f42c1;
+            color: white;
+            border-color: #5936a3;
+        }
+
+        .pagination li.disabled span {
+            background-color: #ddd;
+            color: #999;
+            border-color: #ccc;
+        }
+
+
     </style>
 {% endblock %}
 

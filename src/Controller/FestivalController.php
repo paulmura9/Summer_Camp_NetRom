@@ -94,13 +94,13 @@ final class FestivalController extends AbstractController
     }
 
     #[Route('/festival/create', name: 'festival_create', methods: ['GET', 'POST'])]
-    public function create(Request $request, EntityManagerInterface $em): Response
+    public function create(Request $request, EntityManagerInterface $em, SluggerInterface $slugger): Response
     {
         $festival = new Festival();
         $festival->setStartDate(new \DateTime());
         $festival->setEndDate(new \DateTime());
-        $form = $this->createForm(FestivalForm::class, $festival);
 
+        $form = $this->createForm(FestivalForm::class, $festival);
         $form->handleRequest($request);
 
         if ($form->isSubmitted()) {
@@ -113,6 +113,23 @@ final class FestivalController extends AbstractController
                 if ($existingFestival) {
                     $this->addFlash('error', 'A festival with this name already exists.');
                 } else {
+                    $imageFile = $form->get('image')->getData();
+                    if ($imageFile) {
+                        $originalFilename = pathinfo($imageFile->getClientOriginalName(), PATHINFO_FILENAME);
+                        $safeFilename = $slugger->slug($originalFilename);
+                        $newFilename = $safeFilename . '-' . uniqid() . '.' . $imageFile->guessExtension();
+
+                        try {
+                            $imageFile->move(
+                                $this->getParameter('festival_images_directory'),
+                                $newFilename
+                            );
+                            $festival->setImage($newFilename);
+                        } catch (FileException $e) {
+                            $this->addFlash('danger', 'Failed to upload image: ' . $e->getMessage());
+                        }
+                    }
+
                     $em->persist($festival);
                     $em->flush();
 

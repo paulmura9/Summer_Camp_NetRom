@@ -136,7 +136,7 @@
         }
 
         .badge-quantity {
-            background-color: #7a24a6;
+            background-color: #9f2828;
             color: white;
             border: none;
             border-radius: 60%;
@@ -258,7 +258,7 @@
         {% if is_granted('ROLE_USER') %}
             {% if festival.capacity == 0 %}
                 <p class="mt-3 text-danger fw-bold" style="font-size: 1.1rem;">Sold out at the moment!</p>
-            {% elseif festival.startDate <= "now"|date('Y-m-d') %}
+            {% elseif festival.startDate|date('U') <= "now"|date('U') %}
                 <p class="mt-3 text-warning fw-bold" style="font-size: 1.1rem;">This event has already started!</p>
             {% else %}
                 <form method="post" action="{{ path('purchase_create', { id: festival.id }) }}" onsubmit="return confirmPurchase()">
